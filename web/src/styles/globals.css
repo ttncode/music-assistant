@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import "@fontsource/geist/400.css";
+@import "@fontsource/geist/500.css";
+@import "@fontsource/geist/600.css";
+@import "@fontsource/geist-mono/400.css";
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  --color-bg: #0a0a0a;
+  --color-surface: #141414;
+  --color-surface-elevated: #1c1c1c;
+  --color-border: #262626;
+  --color-text: #fafafa;
+  --color-text-secondary: #71717a;
+  --color-text-muted: #3f3f46;
+  --color-accent: #10b981;
+  --color-accent-muted: #064e3b;
+  --color-error: #ef4444;
+
+  --color-platform-youtube: #ef4444;
+  --color-platform-soundcloud: #f97316;
+  --color-platform-tiktok: #06b6d4;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
