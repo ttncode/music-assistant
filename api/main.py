@@ -2,7 +2,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from routers import auth, devices, songs, sync, download
+from routers import auth, devices, songs, sync, download, status
 
 app = FastAPI(title="Music Assistant")
 
@@ -12,6 +12,7 @@ app.include_router(devices.router)
 app.include_router(songs.router)
 app.include_router(sync.router)
 app.include_router(download.router)
+app.include_router(status.router)
 
 # Serve React build — only in production (web/dist must exist)
 _DIST = Path(__file__).parent / "web" / "dist"
