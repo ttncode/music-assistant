@@ -36,6 +36,17 @@ export interface SongsListResponse {
   playlists: string[]
 }
 
+export interface ProviderStatusItem {
+  configured: boolean
+  reachable: boolean
+  error: string | null
+}
+
+export interface ProvidersStatusResponse {
+  youtube: ProviderStatusItem
+  soundcloud: ProviderStatusItem
+}
+
 export const api = {
   auth: {
     verify: (code: string) => req<{ ok: boolean }>('POST', '/api/auth/verify', { code }),
@@ -59,5 +70,8 @@ export const api = {
       const device = getDevice()
       return `/api/download/${songId}?device_id=${device?.id ?? ''}`
     },
+  },
+  providers: {
+    status: () => req<ProvidersStatusResponse>('GET', '/api/status/providers'),
   },
 }
