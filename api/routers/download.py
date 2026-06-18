@@ -66,7 +66,9 @@ async def serve_download(
 
     # Mark as downloaded for this device
     if device_id not in song.device_downloads:
-        song.device_downloads[device_id] = DeviceDownload(name="Unknown")
+        device = next((d for d in data.devices if d.id == device_id), None)
+        device_name = device.name if device else "Unknown"
+        song.device_downloads[device_id] = DeviceDownload(name=device_name)
     song.device_downloads[device_id].downloaded = True
     song.device_downloads[device_id].downloaded_at = datetime.utcnow()
     write_songs(data, settings.data_dir)

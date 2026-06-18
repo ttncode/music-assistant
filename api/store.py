@@ -2,9 +2,6 @@ from pathlib import Path
 from filelock import FileLock
 from models import SongsFile
 
-_EMPTY = SongsFile()
-
-
 def _path(data_dir: str) -> Path:
     return Path(data_dir) / "songs.json"
 
