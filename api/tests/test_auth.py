@@ -25,5 +25,13 @@ def test_verify_wrong_code(client):
 
 
 def test_protected_route_requires_device_id(client):
-    res = client.get("/api/songs")
-    assert res.status_code == 422  # missing header
+    from fastapi import Depends
+    from routers.auth import get_device_id
+    from main import app
+
+    @app.get("/api/test-device-gate")
+    async def _gate(_: str = Depends(get_device_id)):
+        return {"ok": True}
+
+    res = client.get("/api/test-device-gate")
+    assert res.status_code == 422
