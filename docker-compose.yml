@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+      - ${HOME}/Music/MusicManager:/music
+    env_file: .env
+    restart: unless-stopped
