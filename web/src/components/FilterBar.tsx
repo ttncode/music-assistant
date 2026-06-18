@@ -7,9 +7,17 @@ interface Props {
   search: string
   onPlaylistChange: (p: string) => void
   onSearchChange: (s: string) => void
+  onEnterSelectMode: () => void
 }
 
-export function FilterBar({ playlists, activePlaylist, search, onPlaylistChange, onSearchChange }: Props) {
+export function FilterBar({
+  playlists,
+  activePlaylist,
+  search,
+  onPlaylistChange,
+  onSearchChange,
+  onEnterSelectMode,
+}: Props) {
   return (
     <div className="space-y-3 px-4 py-3 border-b border-[var(--color-border)]">
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -21,12 +29,20 @@ export function FilterBar({ playlists, activePlaylist, search, onPlaylistChange,
               'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors',
               activePlaylist === pl
                 ? 'bg-[var(--color-accent)] text-white'
-                : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+                : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]',
             )}
           >
             {pl}
           </button>
         ))}
+
+        {/* Mobile-only: enter select mode */}
+        <button
+          onClick={onEnterSelectMode}
+          className="md:hidden shrink-0 rounded-full px-3 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
+        >
+          Select
+        </button>
       </div>
 
       <div className="relative">
