@@ -1,4 +1,3 @@
-from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from config import Settings, get_settings
@@ -25,9 +24,11 @@ async def register_device(body: RegisterBody, settings: Settings = Depends(get_s
 @router.delete("/{device_id}/history")
 async def clear_history(
     device_id: str,
-    _: str = Depends(get_device_id),
+    caller_id: str = Depends(get_device_id),
     settings: Settings = Depends(get_settings),
 ):
+    if caller_id != device_id:
+        raise HTTPException(status_code=403, detail="Cannot clear another device's history")
     data = read_songs(settings.data_dir)
     for song in data.songs:
         if device_id in song.device_downloads:
