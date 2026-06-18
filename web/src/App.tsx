@@ -36,7 +36,10 @@ export default function App() {
   const { status: providerStatus } = useProviderStatus(syncVersion)
   const { selected, isSelectMode, toggle, selectAll, clearAll, enterSelectMode, exitSelectMode } =
     useSelection()
-  const { downloadBatch, progress, isRunning } = useBatchDownload(refetch)
+  const { downloadBatch, progress, isRunning } = useBatchDownload(() => {
+    refetch()
+    exitSelectMode()
+  })
 
   // Mirror the filter logic from SongList to compute what's visible and undownloaded
   const filteredUndownloadedIds = songs
