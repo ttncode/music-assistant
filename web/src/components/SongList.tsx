@@ -8,9 +8,21 @@ interface Props {
   search: string
   onDelete: (id: string) => void
   onDownloaded: () => void
+  isSelectMode: boolean
+  selected: Set<string>
+  onToggle: (id: string) => void
 }
 
-export function SongList({ songs, activePlaylist, search, onDelete, onDownloaded }: Props) {
+export function SongList({
+  songs,
+  activePlaylist,
+  search,
+  onDelete,
+  onDownloaded,
+  isSelectMode,
+  selected,
+  onToggle,
+}: Props) {
   const filtered = songs.filter(s => {
     const matchPlaylist = activePlaylist === 'All' || s.playlist === activePlaylist
     const matchSearch = !search || s.title.toLowerCase().includes(search.toLowerCase())
@@ -22,7 +34,9 @@ export function SongList({ songs, activePlaylist, search, onDelete, onDownloaded
       <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
         <MusicNote size={40} className="text-[var(--color-text-muted)] mb-4" />
         <p className="text-sm text-[var(--color-text-secondary)]">No songs yet.</p>
-        <p className="text-xs text-[var(--color-text-muted)] mt-1">Paste a YouTube or SoundCloud link above to get started.</p>
+        <p className="text-xs text-[var(--color-text-muted)] mt-1">
+          Paste a YouTube or SoundCloud link above to get started.
+        </p>
       </div>
     )
   }
@@ -38,7 +52,15 @@ export function SongList({ songs, activePlaylist, search, onDelete, onDownloaded
   return (
     <div>
       {filtered.map(song => (
-        <SongRow key={song.id} song={song} onDelete={onDelete} onDownloaded={onDownloaded} />
+        <SongRow
+          key={song.id}
+          song={song}
+          onDelete={onDelete}
+          onDownloaded={onDownloaded}
+          isSelectMode={isSelectMode}
+          selected={selected.has(song.id)}
+          onToggle={onToggle}
+        />
       ))}
     </div>
   )
