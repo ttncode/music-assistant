@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { Plus, CircleNotch } from '@phosphor-icons/react'
+import { Plus, CircleNotch, YoutubeLogo, SoundcloudLogo } from '@phosphor-icons/react'
 
 interface Props {
   playlists: string[]
@@ -33,6 +33,11 @@ export function AddSongForm({ playlists, onAdd }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="px-4 py-3 border-b border-[var(--color-border)] space-y-2">
+      <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
+        <YoutubeLogo size={11} color="var(--color-platform-youtube)" />
+        <SoundcloudLogo size={11} color="var(--color-platform-soundcloud)" />
+        Add to library
+      </p>
       <input
         value={url}
         onChange={e => setUrl(e.target.value)}
