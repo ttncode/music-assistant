@@ -34,6 +34,7 @@ export interface SongResponse {
 export interface SongsListResponse {
   songs: SongResponse[]
   playlists: string[]
+  playlist_sources: Record<string, string>
 }
 
 export interface ProviderStatusItem {

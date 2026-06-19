@@ -13,7 +13,12 @@ export interface UseBatchDownloadReturn {
   isRunning: boolean
 }
 
-export function useBatchDownload(onComplete: () => void): UseBatchDownloadReturn {
+interface Options {
+  onSongDownloaded?: (id: string) => void
+  onComplete?: (downloadedCount: number) => void
+}
+
+export function useBatchDownload({ onSongDownloaded, onComplete }: Options): UseBatchDownloadReturn {
   const [progress, setProgress] = useState<Progress | null>(null)
   const runningRef = useRef(false)
   const cancelledRef = useRef(false)
@@ -29,10 +34,9 @@ export function useBatchDownload(onComplete: () => void): UseBatchDownloadReturn
       cancelledRef.current = false
       setProgress({ current: 0, total: songIds.length })
 
-      // Kick off all server-side downloads in parallel so yt-dlp starts fetching all songs at once
       await Promise.allSettled(songIds.map(id => api.download.prepare(id)))
 
-      // Trigger browser file-save dialogs sequentially with 800ms gaps to avoid pop-up blocking
+      let downloaded = 0
       for (let i = 0; i < songIds.length; i++) {
         if (cancelledRef.current) break
         const link = document.createElement('a')
@@ -41,7 +45,9 @@ export function useBatchDownload(onComplete: () => void): UseBatchDownloadReturn
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        setProgress({ current: i + 1, total: songIds.length })
+        downloaded++
+        onSongDownloaded?.(songIds[i])
+        setProgress({ current: downloaded, total: songIds.length })
         if (i < songIds.length - 1) {
           await new Promise<void>(resolve => setTimeout(resolve, 800))
         }
@@ -51,9 +57,9 @@ export function useBatchDownload(onComplete: () => void): UseBatchDownloadReturn
       runningRef.current = false
       cancelledRef.current = false
       setProgress(null)
-      if (!wasCancelled) onComplete()
+      if (!wasCancelled) onComplete?.(downloaded)
     },
-    [onComplete],
+    [onSongDownloaded, onComplete],
   )
 
   return { downloadBatch, cancel, progress, isRunning: progress !== null }

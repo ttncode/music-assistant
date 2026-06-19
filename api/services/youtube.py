@@ -9,7 +9,7 @@ async def fetch_youtube_playlists(api_key: str, channel_id: str) -> list[dict]:
         result = []
         for pl in playlists:
             songs = await _get_playlist_items(client, api_key, pl["id"])
-            result.append({"title": pl["snippet"]["title"], "playlist_id": pl["id"], "songs": songs})
+            result.append({"title": pl["snippet"]["title"], "playlist_id": pl["id"], "platform": "youtube", "songs": songs})
         return result
 
 

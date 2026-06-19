@@ -5,6 +5,7 @@ import { useSync } from './hooks/useSync'
 import { useSelection } from './hooks/useSelection'
 import { useBatchDownload } from './hooks/useBatchDownload'
 import { useProviderStatus } from './hooks/useProviderStatus'
+import { useToast } from './hooks/useToast'
 import { AuthScreen } from './components/AuthScreen'
 import { DeviceNameScreen } from './components/DeviceNameScreen'
 import { Header } from './components/Header'
@@ -14,6 +15,7 @@ import { SongList } from './components/SongList'
 import { SelectionBar } from './components/SelectionBar'
 import { TikTokDownload } from './components/TikTokDownload'
 import { SettingsSheet } from './components/SettingsSheet'
+import { Toaster } from './components/Toaster'
 
 type AuthState = 'checking' | 'needs_code' | 'needs_name' | 'ready'
 
@@ -24,24 +26,37 @@ export default function App() {
   const [activePlaylist, setActivePlaylist] = useState('All')
   const [search, setSearch] = useState('')
   const [syncVersion, setSyncVersion] = useState(0)
+  const [justDownloaded, setJustDownloaded] = useState<Set<string>>(new Set())
 
-  const { songs, playlists, pendingCount, refetch, removeSong, addSong } = useSongs()
+  const { songs, playlists, playlistSources, pendingCount, refetch, removeSong, addSong } = useSongs()
+  const { toasts, toast, removeToast } = useToast()
 
-  const handleSyncComplete = useCallback(() => {
+  const handleSyncComplete = useCallback(({ added, error }: { added: number; error: string | null }) => {
     refetch()
     setSyncVersion(v => v + 1)
-  }, [refetch])
+    if (error) {
+      toast.error('Sync failed')
+    } else if (added > 0) {
+      toast.success(`Synced: ${added} new song${added !== 1 ? 's' : ''} added`)
+    } else {
+      toast.info('Already up to date')
+    }
+  }, [refetch, toast])
 
   const { trigger: triggerSync, running: syncRunning } = useSync(handleSyncComplete)
   const { status: providerStatus } = useProviderStatus(syncVersion)
-  const { selected, isSelectMode, toggle, selectAll, clearAll, enterSelectMode, exitSelectMode } =
-    useSelection()
-  const { downloadBatch, cancel: cancelDownload, progress, isRunning } = useBatchDownload(() => {
-    refetch()
-    exitSelectMode()
+  const { selected, isSelectMode, toggle, selectAll, clearAll, enterSelectMode, exitSelectMode } = useSelection()
+
+  const { downloadBatch, cancel: cancelDownload, progress, isRunning } = useBatchDownload({
+    onSongDownloaded: (id) => setJustDownloaded(prev => new Set([...prev, id])),
+    onComplete: (count) => {
+      refetch()
+      exitSelectMode()
+      setJustDownloaded(new Set())
+      toast.success(`Downloaded ${count} song${count !== 1 ? 's' : ''}`)
+    },
   })
 
-  // Mirror the filter logic from SongList to compute what's visible and undownloaded
   const filteredUndownloadedIds = songs
     .filter(s => {
       const matchPlaylist = activePlaylist === 'All' || s.playlist === activePlaylist
@@ -58,12 +73,10 @@ export default function App() {
     selectAll(filteredUndownloadedIds)
   }, [selectAll, filteredUndownloadedIds])
 
-  const handleAdd = useCallback(
-    async (url: string, playlist: string): Promise<void> => {
-      await addSong(url, playlist)
-    },
-    [addSong],
-  )
+  const handleAdd = useCallback(async (url: string, playlist: string): Promise<void> => {
+    await addSong(url, playlist)
+    toast.success('Song added to library')
+  }, [addSong, toast])
 
   const handleVerified = useCallback(() => setAuthState('needs_name'), [])
   const handleRegistered = useCallback(() => setAuthState('ready'), [])
@@ -87,6 +100,7 @@ export default function App() {
 
       <FilterBar
         playlists={playlists}
+        playlistSources={playlistSources}
         activePlaylist={activePlaylist}
         search={search}
         onPlaylistChange={setActivePlaylist}
@@ -104,6 +118,7 @@ export default function App() {
           isSelectMode={isSelectMode}
           selected={selected}
           onToggle={toggle}
+          justDownloaded={justDownloaded}
         />
       </main>
 
@@ -119,6 +134,8 @@ export default function App() {
         onCancel={exitSelectMode}
         onCancelDownload={cancelDownload}
       />
+
+      <Toaster toasts={toasts} onRemove={removeToast} />
 
       <SettingsSheet
         open={settingsOpen}

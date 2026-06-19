@@ -40,7 +40,7 @@ async def get_songs(
             **s.model_dump(),
             "downloaded": dd.downloaded if dd else False,
         })
-    return {"songs": songs_out, "playlists": data.playlists}
+    return {"songs": songs_out, "playlists": data.playlists, "playlist_sources": data.playlist_sources}
 
 
 @router.post("", status_code=201)
@@ -57,6 +57,7 @@ async def add_song(
         url=body.url,
         platform=detect_platform(body.url),
         playlist=body.playlist,
+        manually_added=True,
     )
     data.songs.insert(0, song)
     if body.playlist not in data.playlists:

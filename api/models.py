@@ -24,6 +24,7 @@ class Song(BaseModel):
     thumbnail: str = ""
     added_at: datetime = Field(default_factory=datetime.utcnow)
     device_downloads: dict[str, DeviceDownload] = Field(default_factory=dict)
+    manually_added: bool = False  # True only for songs added via the API, not sync
 
 
 class Device(BaseModel):
@@ -36,3 +37,4 @@ class SongsFile(BaseModel):
     songs: list[Song] = Field(default_factory=list)
     playlists: list[str] = Field(default_factory=list)
     devices: list[Device] = Field(default_factory=list)
+    playlist_sources: dict[str, str] = Field(default_factory=dict)  # playlist name -> platform

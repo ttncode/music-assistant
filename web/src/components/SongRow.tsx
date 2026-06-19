@@ -19,6 +19,7 @@ interface Props {
   isSelectMode: boolean
   selected: boolean
   onToggle: (id: string) => void
+  isJustDownloaded?: boolean
 }
 
 const PLATFORM_ICONS = {
@@ -35,9 +36,12 @@ const PLATFORM_COLORS = {
   other: 'var(--color-text-secondary)',
 }
 
-export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, onToggle }: Props) {
+export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, onToggle, isJustDownloaded }: Props) {
   const [downloading, setDownloading] = useState(false)
+  const [localDownloaded, setLocalDownloaded] = useState(false)
   const PlatformIcon = PLATFORM_ICONS[song.platform]
+
+  const isDownloaded = song.downloaded || isJustDownloaded || localDownloaded
 
   async function handleDownload() {
     setDownloading(true)
@@ -49,6 +53,7 @@ export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, 
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      setLocalDownloaded(true)
       setTimeout(onDownloaded, 3000)
     } finally {
       setDownloading(false)
@@ -57,7 +62,7 @@ export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, 
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors group">
-      {/* Checkbox: always visible on md+, only visible in select mode on mobile */}
+      {/* Checkbox */}
       <button
         onClick={() => onToggle(song.id)}
         aria-label={selected ? 'Deselect song' : 'Select song'}
@@ -72,12 +77,19 @@ export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, 
         {selected && <Check size={10} weight="bold" className="text-white" />}
       </button>
 
-      {/* Thumbnail */}
-      <div className="shrink-0 w-10 h-10 rounded-md bg-[var(--color-surface-elevated)] overflow-hidden flex items-center justify-center">
-        {song.thumbnail ? (
-          <img src={song.thumbnail} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <PlatformIcon size={18} color={PLATFORM_COLORS[song.platform]} />
+      {/* Thumbnail with downloaded badge */}
+      <div className="relative shrink-0 w-10 h-10 rounded-md bg-[var(--color-surface-elevated)] overflow-visible flex items-center justify-center">
+        <div className="w-10 h-10 rounded-md overflow-hidden flex items-center justify-center">
+          {song.thumbnail ? (
+            <img src={song.thumbnail} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <PlatformIcon size={18} color={PLATFORM_COLORS[song.platform]} />
+          )}
+        </div>
+        {isDownloaded && (
+          <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[var(--color-bg)] flex items-center justify-center">
+            <CheckCircle size={13} weight="fill" className="text-[var(--color-accent)]" />
+          </span>
         )}
       </div>
 
@@ -97,14 +109,9 @@ export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, 
         </div>
       </div>
 
-      {/* Status + actions */}
+      {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
-        {song.downloaded ? (
-          <span className="flex items-center gap-1 text-[11px] text-[var(--color-accent)] font-medium">
-            <CheckCircle size={14} weight="fill" />
-            Done
-          </span>
-        ) : (
+        {!isDownloaded && (
           <button
             onClick={handleDownload}
             disabled={downloading}

@@ -1,8 +1,9 @@
-import { MagnifyingGlass } from '@phosphor-icons/react'
+import { MagnifyingGlass, YoutubeLogo, SoundcloudLogo } from '@phosphor-icons/react'
 import { clsx } from 'clsx'
 
 interface Props {
   playlists: string[]
+  playlistSources: Record<string, string>
   activePlaylist: string
   search: string
   onPlaylistChange: (p: string) => void
@@ -10,8 +11,15 @@ interface Props {
   onEnterSelectMode: () => void
 }
 
+function PlaylistIcon({ platform }: { platform?: string }) {
+  if (platform === 'youtube') return <YoutubeLogo size={10} color="var(--color-platform-youtube)" />
+  if (platform === 'soundcloud') return <SoundcloudLogo size={10} color="var(--color-platform-soundcloud)" />
+  return null
+}
+
 export function FilterBar({
   playlists,
+  playlistSources,
   activePlaylist,
   search,
   onPlaylistChange,
@@ -26,12 +34,13 @@ export function FilterBar({
             key={pl}
             onClick={() => onPlaylistChange(pl)}
             className={clsx(
-              'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors',
+              'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors flex items-center gap-1',
               activePlaylist === pl
                 ? 'bg-[var(--color-accent)] text-white'
                 : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]',
             )}
           >
+            {pl !== 'All' && <PlaylistIcon platform={playlistSources[pl]} />}
             {pl}
           </button>
         ))}

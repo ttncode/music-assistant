@@ -14,6 +14,7 @@ interface Props {
   isSelectMode: boolean
   selected: Set<string>
   onToggle: (id: string) => void
+  justDownloaded: Set<string>
 }
 
 export function SongList({
@@ -25,6 +26,7 @@ export function SongList({
   isSelectMode,
   selected,
   onToggle,
+  justDownloaded,
 }: Props) {
   const [page, setPage] = useState(1)
 
@@ -74,6 +76,7 @@ export function SongList({
           isSelectMode={isSelectMode}
           selected={selected.has(song.id)}
           onToggle={onToggle}
+          isJustDownloaded={justDownloaded.has(song.id)}
         />
       ))}
 

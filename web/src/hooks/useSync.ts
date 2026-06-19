@@ -1,9 +1,13 @@
 import { useState, useCallback } from 'react'
 import { api } from '../lib/api'
 
-export function useSync(onComplete: () => void) {
+export interface SyncResult {
+  added: number
+  error: string | null
+}
+
+export function useSync(onComplete: (result: SyncResult) => void) {
   const [running, setRunning] = useState(false)
-  const [lastResult, setLastResult] = useState<{ added: number } | null>(null)
 
   const trigger = useCallback(async () => {
     if (running) return
@@ -15,14 +19,14 @@ export function useSync(onComplete: () => void) {
         if (!status.running) {
           clearInterval(poll)
           setRunning(false)
-          setLastResult({ added: status.added })
-          onComplete()
+          onComplete({ added: status.added, error: status.error })
         }
       }, 2000)
     } catch {
       setRunning(false)
+      onComplete({ added: 0, error: 'Failed to start sync' })
     }
   }, [running, onComplete])
 
-  return { trigger, running, lastResult }
+  return { trigger, running }
 }

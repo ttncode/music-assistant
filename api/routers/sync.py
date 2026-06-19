@@ -36,35 +36,87 @@ async def _run_sync(settings: Settings):
     try:
         all_playlists: list[dict] = []
 
+        sync_platforms: set[str] = set()
         if settings.youtube_api_key and settings.youtube_channel_id:
             yt = await fetch_youtube_playlists(settings.youtube_api_key, settings.youtube_channel_id)
             all_playlists.extend(yt)
+            sync_platforms.add("youtube")
 
         if settings.soundcloud_profile_url:
             sc = await asyncio.to_thread(fetch_soundcloud_playlists, settings.soundcloud_profile_url)
             all_playlists.extend(sc)
+            sync_platforms.add("soundcloud")
 
-        data = read_songs(settings.data_dir)
-        existing_urls = {s.url for s in data.songs}
-        added = 0
+        # Build source truth indexed by URL (first occurrence wins for duplicates)
+        source_by_url: dict[str, dict] = {}
+        playlist_order: dict[str, int] = {}   # playlist name -> source index
+        song_order: dict[str, int] = {}        # url -> position within its playlist
+        playlist_sources: dict[str, str] = {}  # playlist name -> platform
 
         for pl in all_playlists:
             pl_name = pl["title"]
-            if pl_name not in data.playlists:
-                data.playlists.append(pl_name)
-            for track in pl["songs"]:
-                if track["url"] in existing_urls:
+            pl_platform = pl.get("platform", "other")
+            if pl_name not in playlist_order:
+                playlist_order[pl_name] = len(playlist_order)
+            playlist_sources[pl_name] = pl_platform
+            for i, track in enumerate(pl["songs"]):
+                url = track.get("url", "")
+                if not url:
                     continue
-                song = Song(
+                if url not in source_by_url:
+                    source_by_url[url] = {
+                        "title": track["title"],
+                        "url": url,
+                        "platform": pl_platform,
+                        "playlist": pl_name,
+                        "thumbnail": track.get("thumbnail", ""),
+                    }
+                    song_order[url] = i
+
+        data = read_songs(settings.data_dir)
+
+        # A song is sync-managed if it comes from a configured platform and was not manually added
+        def is_sync_managed(s: Song) -> bool:
+            return s.platform in sync_platforms and not s.manually_added
+
+        sync_songs_by_url = {s.url: s for s in data.songs if is_sync_managed(s)}
+        manual_songs = [s for s in data.songs if not is_sync_managed(s)]
+
+        # Rebuild sync songs from source, preserving existing ids and device_downloads
+        new_sync_songs: list[Song] = []
+        added = 0
+
+        for url, track in source_by_url.items():
+            if url in sync_songs_by_url:
+                existing = sync_songs_by_url[url]
+                existing.title = track["title"]
+                existing.thumbnail = track["thumbnail"]
+                existing.playlist = track["playlist"]
+                new_sync_songs.append(existing)
+            else:
+                new_sync_songs.append(Song(
                     title=track["title"],
-                    url=track["url"],
-                    platform=detect_platform(track["url"]),
-                    playlist=pl_name,
-                    thumbnail=track.get("thumbnail", ""),
-                )
-                data.songs.append(song)
-                existing_urls.add(track["url"])
+                    url=url,
+                    platform=detect_platform(url),
+                    playlist=track["playlist"],
+                    thumbnail=track["thumbnail"],
+                ))
                 added += 1
+
+        # Sort by source playlist order then by position within playlist
+        new_sync_songs.sort(
+            key=lambda s: (playlist_order.get(s.playlist, 9999), song_order.get(s.url, 0))
+        )
+
+        data.songs = new_sync_songs + manual_songs
+
+        # Playlists: source order first, then any manual-only playlists appended
+        manual_only_playlists = [
+            p for p in dict.fromkeys(s.playlist for s in manual_songs)
+            if p not in playlist_sources
+        ]
+        data.playlists = list(playlist_order.keys()) + manual_only_playlists
+        data.playlist_sources = playlist_sources
 
         write_songs(data, settings.data_dir)
         _status = {"running": False, "added": added, "total": len(data.songs), "error": None}

@@ -27,5 +27,5 @@ def fetch_soundcloud_playlists(profile_url: str) -> list[dict]:
                     "url": track.get("url", ""),
                     "thumbnail": track.get("thumbnail", ""),
                 })
-            playlists.append({"title": entry.get("title", ""), "songs": songs})
+            playlists.append({"title": entry.get("title", ""), "platform": "soundcloud", "songs": songs})
     return playlists
