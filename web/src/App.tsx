@@ -36,7 +36,7 @@ export default function App() {
   const { status: providerStatus } = useProviderStatus(syncVersion)
   const { selected, isSelectMode, toggle, selectAll, clearAll, enterSelectMode, exitSelectMode } =
     useSelection()
-  const { downloadBatch, progress, isRunning } = useBatchDownload(() => {
+  const { downloadBatch, cancel: cancelDownload, progress, isRunning } = useBatchDownload(() => {
     refetch()
     exitSelectMode()
   })
@@ -82,6 +82,7 @@ export default function App() {
       />
 
       <AddSongForm playlists={playlists} onAdd={handleAdd} />
+      <TikTokDownload />
       <FilterBar
         playlists={playlists}
         activePlaylist={activePlaylist}
@@ -104,8 +105,6 @@ export default function App() {
         />
       </main>
 
-      <TikTokDownload />
-
       <SelectionBar
         selected={selected}
         isSelectMode={isSelectMode}
@@ -116,6 +115,7 @@ export default function App() {
         onSelectAllUndownloaded={handleSelectAllUndownloaded}
         onClearAll={clearAll}
         onCancel={exitSelectMode}
+        onCancelDownload={cancelDownload}
       />
 
       <SettingsSheet

@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { Plus } from '@phosphor-icons/react'
+import { Plus, CircleNotch } from '@phosphor-icons/react'
 
 interface Props {
   playlists: string[]
@@ -66,7 +66,9 @@ export function AddSongForm({ playlists, onAdd }: Props) {
           disabled={loading || !url.trim()}
           className="flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-2 text-sm font-medium text-white disabled:opacity-40 active:scale-[0.98] transition-transform shrink-0"
         >
-          <Plus size={14} weight="bold" />
+          {loading
+            ? <CircleNotch size={14} className="animate-spin" />
+            : <Plus size={14} weight="bold" />}
           {loading ? 'Adding...' : 'Add'}
         </button>
       </div>

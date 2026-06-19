@@ -40,7 +40,7 @@ export function TikTokDownload() {
   }
 
   return (
-    <div className="px-4 py-3 border-t border-[var(--color-border)]">
+    <div className="px-4 py-3 border-b border-[var(--color-border)]">
       <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-2 flex items-center gap-1">
         <TiktokLogo size={11} color="var(--color-platform-tiktok)" />
         TikTok quick download

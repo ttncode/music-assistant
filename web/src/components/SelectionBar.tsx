@@ -1,4 +1,4 @@
-import { ArrowCircleDown, X } from '@phosphor-icons/react'
+import { ArrowCircleDown, X, StopCircle } from '@phosphor-icons/react'
 
 interface Props {
   selected: Set<string>
@@ -10,6 +10,7 @@ interface Props {
   onSelectAllUndownloaded: () => void
   onClearAll: () => void
   onCancel: () => void
+  onCancelDownload: () => void
 }
 
 export function SelectionBar({
@@ -22,6 +23,7 @@ export function SelectionBar({
   onSelectAllUndownloaded,
   onClearAll,
   onCancel,
+  onCancelDownload,
 }: Props) {
   // Visible when desktop has a selection, or mobile is in select mode
   if (selected.size === 0 && !isSelectMode) return null
@@ -30,9 +32,18 @@ export function SelectionBar({
     <div className="fixed bottom-0 inset-x-0 z-20 border-t border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
       <div className="flex items-center gap-2 max-w-2xl mx-auto px-4 py-3 flex-wrap">
         {isRunning && progress ? (
-          <span className="flex-1 text-sm text-[var(--color-text-secondary)]">
-            Downloading {progress.current} of {progress.total}...
-          </span>
+          <>
+            <span className="flex-1 text-sm text-[var(--color-text-secondary)]">
+              Downloading {progress.current} of {progress.total}...
+            </span>
+            <button
+              onClick={onCancelDownload}
+              className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:border-[var(--color-error)] transition-colors"
+            >
+              <StopCircle size={14} />
+              Cancel
+            </button>
+          </>
         ) : selected.size > 0 ? (
           <button
             onClick={onDownloadSelected}
