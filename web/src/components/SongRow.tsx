@@ -16,6 +16,7 @@ interface Props {
   song: SongResponse
   onDelete: (id: string) => void
   onDownloaded: () => void
+  onError: (message: string) => void
   isSelectMode: boolean
   selected: boolean
   onToggle: (id: string) => void
@@ -36,7 +37,7 @@ const PLATFORM_COLORS = {
   other: 'var(--color-text-secondary)',
 }
 
-export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, onToggle, isJustDownloaded }: Props) {
+export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, isJustDownloaded }: Props) {
   const [downloading, setDownloading] = useState(false)
   const [localDownloaded, setLocalDownloaded] = useState(false)
   const PlatformIcon = PLATFORM_ICONS[song.platform]
@@ -47,14 +48,11 @@ export function SongRow({ song, onDelete, onDownloaded, isSelectMode, selected, 
     setDownloading(true)
     try {
       await api.download.prepare(song.id)
-      const link = document.createElement('a')
-      link.href = api.download.url(song.id)
-      link.download = ''
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      await api.download.file(song.id)
       setLocalDownloaded(true)
-      setTimeout(onDownloaded, 3000)
+      onDownloaded()
+    } catch (e) {
+      onError(e instanceof Error ? e.message : 'Download failed')
     } finally {
       setDownloading(false)
     }

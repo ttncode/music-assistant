@@ -71,6 +71,25 @@ export const api = {
       const device = getDevice()
       return `/api/download/${songId}?device_id=${device?.id ?? ''}`
     },
+    file: async (songId: string): Promise<void> => {
+      const device = getDevice()
+      const res = await fetch(`/api/download/${songId}?device_id=${device?.id ?? ''}`)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail ?? `Download failed (${res.status})`)
+      }
+      const blob = await res.blob()
+      const disposition = res.headers.get('content-disposition') ?? ''
+      const filename = disposition.match(/filename="(.+?)"/)?.[1] ?? `${songId}.mp3`
+      const objectUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = objectUrl
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objectUrl)
+    },
   },
   providers: {
     status: () => req<ProvidersStatusResponse>('GET', '/api/status/providers'),

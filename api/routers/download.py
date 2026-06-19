@@ -62,7 +62,10 @@ async def serve_download(
 
     mp3_path = get_file_path(song.url, song.playlist, settings.music_dir)
     if not mp3_path or not Path(mp3_path).exists():
-        mp3_path = await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
+        try:
+            mp3_path = await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     # Mark as downloaded for this device
     if device_id not in song.device_downloads:

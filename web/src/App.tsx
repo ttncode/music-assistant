@@ -49,11 +49,12 @@ export default function App() {
 
   const { downloadBatch, cancel: cancelDownload, progress, isRunning } = useBatchDownload({
     onSongDownloaded: (id) => setJustDownloaded(prev => new Set([...prev, id])),
-    onComplete: (count) => {
+    onComplete: (downloaded, failed) => {
       refetch()
       exitSelectMode()
       setJustDownloaded(new Set())
-      toast.success(`Downloaded ${count} song${count !== 1 ? 's' : ''}`)
+      if (downloaded > 0) toast.success(`Downloaded ${downloaded} song${downloaded !== 1 ? 's' : ''}`)
+      if (failed > 0) toast.error(`${failed} song${failed !== 1 ? 's' : ''} failed to download`)
     },
   })
 
@@ -119,6 +120,7 @@ export default function App() {
           search={search}
           onDelete={handleDelete}
           onDownloaded={refetch}
+          onError={(msg) => toast.error(msg)}
           isSelectMode={isSelectMode}
           selected={selected}
           onToggle={toggle}

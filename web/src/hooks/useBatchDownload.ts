@@ -15,7 +15,7 @@ export interface UseBatchDownloadReturn {
 
 interface Options {
   onSongDownloaded?: (id: string) => void
-  onComplete?: (downloadedCount: number) => void
+  onComplete?: (downloaded: number, failed: number) => void
 }
 
 export function useBatchDownload({ onSongDownloaded, onComplete }: Options): UseBatchDownloadReturn {
@@ -34,20 +34,22 @@ export function useBatchDownload({ onSongDownloaded, onComplete }: Options): Use
       cancelledRef.current = false
       setProgress({ current: 0, total: songIds.length })
 
+      // Start server-side prepare for all songs in parallel
       await Promise.allSettled(songIds.map(id => api.download.prepare(id)))
 
       let downloaded = 0
+      let failed = 0
+
       for (let i = 0; i < songIds.length; i++) {
         if (cancelledRef.current) break
-        const link = document.createElement('a')
-        link.href = api.download.url(songIds[i])
-        link.download = ''
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        downloaded++
-        onSongDownloaded?.(songIds[i])
-        setProgress({ current: downloaded, total: songIds.length })
+        try {
+          await api.download.file(songIds[i])
+          downloaded++
+          onSongDownloaded?.(songIds[i])
+        } catch {
+          failed++
+        }
+        setProgress({ current: i + 1, total: songIds.length })
         if (i < songIds.length - 1) {
           await new Promise<void>(resolve => setTimeout(resolve, 800))
         }
@@ -57,7 +59,7 @@ export function useBatchDownload({ onSongDownloaded, onComplete }: Options): Use
       runningRef.current = false
       cancelledRef.current = false
       setProgress(null)
-      if (!wasCancelled) onComplete?.(downloaded)
+      if (!wasCancelled) onComplete?.(downloaded, failed)
     },
     [onSongDownloaded, onComplete],
   )

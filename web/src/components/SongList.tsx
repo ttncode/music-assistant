@@ -11,6 +11,7 @@ interface Props {
   search: string
   onDelete: (id: string) => void
   onDownloaded: () => void
+  onError: (message: string) => void
   isSelectMode: boolean
   selected: Set<string>
   onToggle: (id: string) => void
@@ -23,6 +24,7 @@ export function SongList({
   search,
   onDelete,
   onDownloaded,
+  onError,
   isSelectMode,
   selected,
   onToggle,
@@ -73,6 +75,7 @@ export function SongList({
           song={song}
           onDelete={onDelete}
           onDownloaded={onDownloaded}
+          onError={onError}
           isSelectMode={isSelectMode}
           selected={selected.has(song.id)}
           onToggle={onToggle}
