@@ -81,8 +81,10 @@ export default function App() {
         providerStatus={providerStatus}
       />
 
-      <AddSongForm playlists={playlists} onAdd={handleAdd} />
       <TikTokDownload />
+
+      <AddSongForm playlists={playlists} onAdd={handleAdd} />
+
       <FilterBar
         playlists={playlists}
         activePlaylist={activePlaylist}
