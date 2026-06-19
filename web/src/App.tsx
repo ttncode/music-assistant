@@ -28,7 +28,7 @@ export default function App() {
   const [syncVersion, setSyncVersion] = useState(0)
   const [justDownloaded, setJustDownloaded] = useState<Set<string>>(new Set())
 
-  const { songs, playlists, playlistSources, pendingCount, refetch, removeSong, addSong } = useSongs()
+  const { songs, playlists, pendingCount, refetch, removeSong, addSong } = useSongs()
   const { toasts, toast, removeToast } = useToast()
 
   const handleSyncComplete = useCallback(({ added, error }: { added: number; error: string | null }) => {
@@ -73,6 +73,11 @@ export default function App() {
     selectAll(filteredUndownloadedIds)
   }, [selectAll, filteredUndownloadedIds])
 
+  const handleDelete = useCallback(async (id: string) => {
+    await removeSong(id)
+    toast.success('Song removed')
+  }, [removeSong, toast])
+
   const handleAdd = useCallback(async (url: string, playlist: string): Promise<void> => {
     await addSong(url, playlist)
     toast.success('Song added to library')
@@ -100,7 +105,6 @@ export default function App() {
 
       <FilterBar
         playlists={playlists}
-        playlistSources={playlistSources}
         activePlaylist={activePlaylist}
         search={search}
         onPlaylistChange={setActivePlaylist}
@@ -113,7 +117,7 @@ export default function App() {
           songs={songs}
           activePlaylist={activePlaylist}
           search={search}
-          onDelete={removeSong}
+          onDelete={handleDelete}
           onDownloaded={refetch}
           isSelectMode={isSelectMode}
           selected={selected}
@@ -140,7 +144,7 @@ export default function App() {
       <SettingsSheet
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onHistoryCleared={refetch}
+        onHistoryCleared={() => { refetch(); toast.success('Download history cleared') }}
       />
     </div>
   )
