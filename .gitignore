@@ -14,3 +14,7 @@ web/.vite/
 
 # OS
 .DS_Store
+
+# Local build artifacts
+web/tsconfig.tsbuildinfo
+data/songs.json.lock
