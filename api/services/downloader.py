@@ -34,7 +34,7 @@ def download_song(url: str, playlist: str, music_dir: str) -> str:
     out_tmpl = str(folder / "%(title)s.%(ext)s")
 
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
         "outtmpl": out_tmpl,
         "writethumbnail": True,
         "postprocessors": [
@@ -44,6 +44,9 @@ def download_song(url: str, playlist: str, music_dir: str) -> str:
         ],
         "nooverwrites": True,
         "quiet": True,
+        "extractor_args": {
+            "youtube": {"player_client": ["android", "web", "ios"]},
+        },
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
