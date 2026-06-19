@@ -34,15 +34,12 @@ def download_song(url: str, playlist: str, music_dir: str) -> str:
     out_tmpl = str(folder / "%(title)s.%(ext)s")
 
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
+        "format": "bestaudio/best",
         "outtmpl": out_tmpl,
-        "writethumbnail": True,
         "postprocessors": [
             {"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "320"},
             {"key": "FFmpegMetadata", "add_metadata": True},
-            {"key": "EmbedThumbnail"},
         ],
-        "nooverwrites": True,
         "quiet": True,
         "socket_timeout": 60,
         "retries": 10,
