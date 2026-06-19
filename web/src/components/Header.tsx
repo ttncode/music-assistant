@@ -16,9 +16,9 @@ function dotColor(item: ProviderStatusItem | undefined): string {
 }
 
 function dotTitle(label: string, item: ProviderStatusItem | undefined): string {
-  if (!item || !item.configured) return `${label}: not configured`
+  if (!item || !item.configured) return `${label}: not connected`
   if (item.reachable) return `${label}: connected`
-  return `${label}: ${item.error ?? 'unreachable'}`
+  return `${label}: not connected`
 }
 
 export function Header({ pendingCount, syncRunning, onSync, onSettings, providerStatus }: Props) {

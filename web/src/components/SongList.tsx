@@ -1,6 +1,9 @@
-import { MusicNote } from '@phosphor-icons/react'
+import { useState, useEffect } from 'react'
+import { CaretLeft, CaretRight, MusicNote } from '@phosphor-icons/react'
 import { SongResponse } from '../lib/api'
 import { SongRow } from './SongRow'
+
+const PAGE_SIZE = 25
 
 interface Props {
   songs: SongResponse[]
@@ -23,6 +26,12 @@ export function SongList({
   selected,
   onToggle,
 }: Props) {
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    setPage(1)
+  }, [activePlaylist, search])
+
   const filtered = songs.filter(s => {
     const matchPlaylist = activePlaylist === 'All' || s.playlist === activePlaylist
     const matchSearch = !search || s.title.toLowerCase().includes(search.toLowerCase())
@@ -49,9 +58,14 @@ export function SongList({
     )
   }
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const safePage = Math.min(page, totalPages)
+  const start = (safePage - 1) * PAGE_SIZE
+  const pageItems = filtered.slice(start, start + PAGE_SIZE)
+
   return (
     <div>
-      {filtered.map(song => (
+      {pageItems.map(song => (
         <SongRow
           key={song.id}
           song={song}
@@ -62,6 +76,35 @@ export function SongList({
           onToggle={onToggle}
         />
       ))}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border)]">
+          <span className="text-xs text-[var(--color-text-muted)]">
+            {start + 1}-{Math.min(start + PAGE_SIZE, filtered.length)} of {filtered.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
+              aria-label="Previous page"
+            >
+              <CaretLeft size={14} />
+            </button>
+            <span className="text-xs text-[var(--color-text-secondary)] px-1">
+              {safePage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
+              aria-label="Next page"
+            >
+              <CaretRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

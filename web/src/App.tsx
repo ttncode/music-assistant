@@ -54,11 +54,9 @@ export default function App() {
     downloadBatch(Array.from(selected))
   }, [downloadBatch, selected])
 
-  // "Select All Undownloaded" selects them and immediately starts the batch download
   const handleSelectAllUndownloaded = useCallback(() => {
     selectAll(filteredUndownloadedIds)
-    downloadBatch(filteredUndownloadedIds)
-  }, [selectAll, downloadBatch, filteredUndownloadedIds])
+  }, [selectAll, filteredUndownloadedIds])
 
   const handleAdd = useCallback(
     async (url: string, playlist: string): Promise<void> => {
