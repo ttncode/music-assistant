@@ -1,7 +1,0 @@
-# Development override: mounts the local web/dist so `npm run build` in web/
-# takes effect immediately without rebuilding the Docker image.
-# Usage: docker compose up -d  (override is picked up automatically)
-services:
-  app:
-    volumes:
-      - ./web/dist:/app/web/dist

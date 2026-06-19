@@ -1,0 +1,8 @@
+# Development only: mounts the local web/dist so `npm run build` in web/
+# takes effect immediately without rebuilding the Docker image.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# NOTE: run `npm run build` inside web/ first, otherwise the mount will be empty.
+services:
+  app:
+    volumes:
+      - ./web/dist:/app/web/dist
