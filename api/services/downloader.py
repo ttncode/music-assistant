@@ -44,6 +44,9 @@ def download_song(url: str, playlist: str, music_dir: str) -> str:
         ],
         "nooverwrites": True,
         "quiet": True,
+        "socket_timeout": 60,
+        "retries": 10,
+        "fragment_retries": 10,
         "extractor_args": {
             "youtube": {"player_client": ["android", "web", "ios"]},
         },

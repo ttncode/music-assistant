@@ -65,7 +65,7 @@ async def serve_download(
         try:
             mp3_path = await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e).replace('\r', ' ').strip())
 
     # Mark as downloaded for this device
     if device_id not in song.device_downloads:
