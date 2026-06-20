@@ -45,6 +45,7 @@ export function SongList({
       <div>
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)] animate-pulse">
+            <div className="hidden md:block shrink-0 w-4 h-4 rounded border border-[var(--color-border)] bg-[var(--color-surface-elevated)]" />
             <div className="shrink-0 w-10 h-10 rounded-md bg-[var(--color-surface-elevated)]" />
             <div className="flex-1 space-y-2">
               <div className="h-3 rounded bg-[var(--color-surface-elevated)] w-3/4" />
