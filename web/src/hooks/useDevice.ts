@@ -12,6 +12,13 @@ export function useDevice() {
     return result
   }, [])
 
+  const rename = useCallback(async (newName: string) => {
+    if (!device) return
+    const result = await api.devices.rename(device.id, newName)
+    storeDevice(result.id, result.name)
+    setDeviceState({ id: result.id, name: result.name })
+  }, [device])
+
   const clear = useCallback(() => {
     clearDevice()
     setDeviceState(null)
@@ -22,6 +29,7 @@ export function useDevice() {
     deviceName: device?.name ?? null,
     isRegistered: device !== null,
     register,
+    rename,
     clear,
   }
 }

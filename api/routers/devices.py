@@ -12,6 +12,10 @@ class RegisterBody(BaseModel):
     name: str
 
 
+class RenameBody(BaseModel):
+    name: str
+
+
 @router.post("/register", status_code=201)
 async def register_device(body: RegisterBody, settings: Settings = Depends(get_settings)):
     data = read_songs(settings.data_dir)
@@ -19,6 +23,24 @@ async def register_device(body: RegisterBody, settings: Settings = Depends(get_s
     data.devices.append(device)
     write_songs(data, settings.data_dir)
     return {"id": device.id, "name": device.name}
+
+
+@router.patch("/{device_id}")
+async def rename_device(
+    device_id: str,
+    body: RenameBody,
+    caller_id: str = Depends(get_device_id),
+    settings: Settings = Depends(get_settings),
+):
+    if caller_id != device_id:
+        raise HTTPException(status_code=403, detail="Cannot rename another device")
+    data = read_songs(settings.data_dir)
+    device = next((d for d in data.devices if d.id == device_id), None)
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    device.name = body.name.strip()
+    write_songs(data, settings.data_dir)
+    return {"id": device_id, "name": device.name}
 
 
 @router.delete("/{device_id}/history")

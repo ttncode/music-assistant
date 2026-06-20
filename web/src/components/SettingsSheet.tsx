@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Trash, SignOut, CircleNotch } from '@phosphor-icons/react'
+import { X, Trash, SignOut, CircleNotch, PencilSimple } from '@phosphor-icons/react'
 import { useDevice } from '../hooks/useDevice'
 import { api } from '../lib/api'
 
@@ -14,17 +14,34 @@ const CONFIRM_PHRASE = 'clear history'
 const UNREGISTER_PHRASE = 'unregister'
 
 export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered }: Props) {
-  const { deviceId, deviceName, clear } = useDevice()
+  const { deviceId, deviceName, rename, clear } = useDevice()
   const [confirmText, setConfirmText] = useState('')
   const [clearing, setClearing] = useState(false)
   const [confirmUnregister, setConfirmUnregister] = useState('')
+  const [editingName, setEditingName] = useState(false)
+  const [draftName, setDraftName] = useState('')
+  const [renaming, setRenaming] = useState(false)
 
   useEffect(() => {
     if (!open) {
       setConfirmText('')
       setConfirmUnregister('')
+      setEditingName(false)
+      setDraftName('')
     }
   }, [open])
+
+  async function handleRename() {
+    const trimmed = draftName.trim()
+    if (!trimmed || trimmed === deviceName) { setEditingName(false); return }
+    setRenaming(true)
+    try {
+      await rename(trimmed)
+      setEditingName(false)
+    } finally {
+      setRenaming(false)
+    }
+  }
 
   async function handleClearHistory() {
     if (!deviceId || confirmText !== CONFIRM_PHRASE) return
@@ -60,8 +77,47 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
         <div className="p-4 space-y-6">
           <section>
             <h3 className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] mb-3">This device</h3>
-            <p className="text-sm font-medium">{deviceName}</p>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 font-mono">{deviceId}</p>
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  value={draftName}
+                  onChange={e => setDraftName(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleRename()
+                    if (e.key === 'Escape') setEditingName(false)
+                  }}
+                  disabled={renaming}
+                  autoFocus
+                  className="flex-1 rounded-lg border border-[var(--color-accent)] bg-[var(--color-bg)] px-2 py-1 text-sm outline-none transition-colors disabled:opacity-50"
+                />
+                <button
+                  onClick={handleRename}
+                  disabled={renaming || !draftName.trim()}
+                  className="cursor-pointer px-2 py-1 rounded text-xs text-[var(--color-accent)] font-medium hover:bg-[var(--color-surface-elevated)] transition-colors disabled:opacity-40"
+                >
+                  {renaming ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setEditingName(false)}
+                  disabled={renaming}
+                  className="cursor-pointer p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group/rename">
+                <p className="text-sm font-medium">{deviceName}</p>
+                <button
+                  onClick={() => { setDraftName(deviceName ?? ''); setEditingName(true) }}
+                  className="cursor-pointer opacity-0 group-hover/rename:opacity-100 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
+                  aria-label="Rename device"
+                >
+                  <PencilSimple size={13} />
+                </button>
+              </div>
+            )}
+            <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-mono">{deviceId}</p>
           </section>
 
           <section>
