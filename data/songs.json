@@ -1,6 +1,107 @@
 {
   "songs": [
     {
+      "id": "c0339a37-8c3b-4c24-89e9-0dd5617073e3",
+      "title": "UNWELL - Late Night PH (Cover)",
+      "url": "https://www.youtube.com/watch?v=nxd6iz4Eq78",
+      "platform": "youtube",
+      "playlist": "Chill English",
+      "thumbnail": "https://i.ytimg.com/vi/nxd6iz4Eq78/hqdefault.jpg",
+      "added_at": "2026-06-20T04:19:51.008045",
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": true,
+          "downloaded_at": "2026-06-20T04:39:34.353602"
+        },
+        "afd3bb11-52ce-471d-98d0-169faeb397b8": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
+      "manually_added": false
+    },
+    {
+      "id": "ecbdecaf-372f-4aae-8c6e-90b5c50d1705",
+      "title": "Wherever You Will Go (R&B x POP Version) – Late Night PH",
+      "url": "https://www.youtube.com/watch?v=wZ-Edgcgh_M",
+      "platform": "youtube",
+      "playlist": "Chill English",
+      "thumbnail": "https://i.ytimg.com/vi/wZ-Edgcgh_M/hqdefault.jpg",
+      "added_at": "2026-06-20T04:19:51.008062",
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": true,
+          "downloaded_at": "2026-06-20T04:39:33.002039"
+        }
+      },
+      "manually_added": false
+    },
+    {
+      "id": "5c4f34c7-49b5-4fb4-b8a6-6b583465e872",
+      "title": "Passenger Seat (R&B x Pop Cover) – Late Night PH",
+      "url": "https://www.youtube.com/watch?v=qvmI2yZh25I",
+      "platform": "youtube",
+      "playlist": "Chill English",
+      "thumbnail": "https://i.ytimg.com/vi/qvmI2yZh25I/hqdefault.jpg",
+      "added_at": "2026-06-20T04:19:51.008071",
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": true,
+          "downloaded_at": "2026-06-20T04:39:31.547997"
+        }
+      },
+      "manually_added": false
+    },
+    {
+      "id": "89e5a67f-6b40-4609-8b43-e22d68038b69",
+      "title": "Here Without You - 3 Doors Down (Late Night PH Cover)",
+      "url": "https://www.youtube.com/watch?v=vNxMRgqeJ6k",
+      "platform": "youtube",
+      "playlist": "Chill English",
+      "thumbnail": "https://i.ytimg.com/vi/vNxMRgqeJ6k/hqdefault.jpg",
+      "added_at": "2026-06-20T04:19:51.008078",
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": true,
+          "downloaded_at": "2026-06-20T04:39:40.362904"
+        }
+      },
+      "manually_added": false
+    },
+    {
+      "id": "1ddce669-a560-4c1f-8e4b-3b83eab4bae4",
+      "title": "TEARDROPS On My GUITAR (R&B x POP Cover) – Late Night PH",
+      "url": "https://www.youtube.com/watch?v=zoUNXPmSHww",
+      "platform": "youtube",
+      "playlist": "Chill English",
+      "thumbnail": "https://i.ytimg.com/vi/zoUNXPmSHww/hqdefault.jpg",
+      "added_at": "2026-06-20T04:19:51.008086",
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
+      "manually_added": false
+    },
+    {
+      "id": "7c769807-0bce-45bd-8ea1-27d5bdb9fda1",
+      "title": "TRUE - Ryan Cabrera (Late Night PH Cover)",
+      "url": "https://www.youtube.com/watch?v=a-V2YYgkWZY",
+      "platform": "youtube",
+      "playlist": "Chill English",
+      "thumbnail": "https://i.ytimg.com/vi/a-V2YYgkWZY/hqdefault.jpg",
+      "added_at": "2026-06-20T04:19:51.008093",
+      "device_downloads": {},
+      "manually_added": false
+    },
+    {
       "id": "c8bc3f3c-e895-4f45-a9b1-ef8e2815f58a",
       "title": "Lazer Boomerang - Time To Pretend (Official Audio)",
       "url": "https://www.youtube.com/watch?v=IXisGwqkJPo",
@@ -8,7 +109,13 @@
       "playlist": "Boost Energy",
       "thumbnail": "https://i.ytimg.com/vi/IXisGwqkJPo/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.491609",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -19,7 +126,13 @@
       "playlist": "Boost Energy",
       "thumbnail": "https://i.ytimg.com/vi/UmreMvT7_A0/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.491542",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -30,7 +143,13 @@
       "playlist": "Boost Energy",
       "thumbnail": "https://i.ytimg.com/vi/B1HzxRCmZqg/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.491558",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -41,7 +160,13 @@
       "playlist": "Deep Bass",
       "thumbnail": "https://i.ytimg.com/vi/VK8wtnHphl4/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.487809",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -52,7 +177,13 @@
       "playlist": "Deep Bass",
       "thumbnail": "https://i.ytimg.com/vi/EDto7bkRxnQ/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.489774",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -63,7 +194,13 @@
       "playlist": "Deep Bass",
       "thumbnail": "https://i.ytimg.com/vi/oUAAorvLrUs/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.489806",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -74,7 +211,13 @@
       "playlist": "Deep Bass",
       "thumbnail": "https://i.ytimg.com/vi/fs55GhefAUQ/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.489827",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -85,7 +228,13 @@
       "playlist": "Deep Bass",
       "thumbnail": "https://i.ytimg.com/vi/IMsZDUt40Kw/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.489843",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -96,7 +245,13 @@
       "playlist": "Deep Bass",
       "thumbnail": "https://i.ytimg.com/vi/6v_g-ituAMA/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.489861",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -595,13 +750,13 @@
       "manually_added": false
     },
     {
-      "id": "1f7591c8-15d7-41ee-ba70-2bc9720b9dc9",
-      "title": "Wherever You Will Go (R&B x POP Version) – Late Night PH",
-      "url": "https://www.youtube.com/watch?v=wZ-Edgcgh_M",
+      "id": "47c45310-d117-4018-a6b4-63d9c9e0b0dc",
+      "title": "Nâng Được Thì Buông Được - Nguyễn Kiều Oanh | Official Music Video | Mây Saigon",
+      "url": "https://www.youtube.com/watch?v=qrHOwDCdfiA",
       "platform": "youtube",
-      "playlist": "Chill",
-      "thumbnail": "https://i.ytimg.com/vi/wZ-Edgcgh_M/hqdefault.jpg",
-      "added_at": "2026-06-18T15:46:05.489880",
+      "playlist": "Live Chill",
+      "thumbnail": "https://i.ytimg.com/vi/qrHOwDCdfiA/hqdefault.jpg",
+      "added_at": "2026-06-20T04:15:33.287482",
       "device_downloads": {},
       "manually_added": false
     },
@@ -613,7 +768,13 @@
       "playlist": "Chill",
       "thumbnail": "https://i.ytimg.com/vi/T6kynJQAmDs/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.493563",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -624,7 +785,13 @@
       "playlist": "Chill",
       "thumbnail": "https://i.ytimg.com/vi/9UcQ7ddVjoc/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.493488",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -635,7 +802,13 @@
       "playlist": "Chill",
       "thumbnail": "https://i.ytimg.com/vi/jtFsZRHUyPE/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.493351",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -646,7 +819,13 @@
       "playlist": "Chill",
       "thumbnail": "https://i.ytimg.com/vi/1pquvJRgIMY/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.490220",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -657,7 +836,13 @@
       "playlist": "Chill",
       "thumbnail": "https://i.ytimg.com/vi/RTBl0s8-y1o/hqdefault.jpg",
       "added_at": "2026-06-18T15:46:05.490276",
-      "device_downloads": {},
+      "device_downloads": {
+        "bbd1a444-66c5-4da7-8373-0414c2ceb327": {
+          "name": "Home Laptop",
+          "downloaded": false,
+          "downloaded_at": null
+        }
+      },
       "manually_added": false
     },
     {
@@ -2235,6 +2420,7 @@
     }
   ],
   "playlists": [
+    "Chill English",
     "Boost Energy",
     "Deep Bass",
     "Remix",
@@ -2261,9 +2447,40 @@
       "id": "d6b5284f-a017-4ba3-87b8-91aeb76f9181",
       "name": "Home Laptop",
       "last_seen": "2026-06-19T02:20:26.012351"
+    },
+    {
+      "id": "bbd1a444-66c5-4da7-8373-0414c2ceb327",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T02:23:10.428270"
+    },
+    {
+      "id": "5bc273b0-d5ee-4b9c-806d-c1960c158963",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T05:06:32.450559"
+    },
+    {
+      "id": "b486645e-c44b-4a85-9122-6878a1b11fcb",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T05:10:11.378430"
+    },
+    {
+      "id": "afd3bb11-52ce-471d-98d0-169faeb397b8",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T05:10:31.385688"
+    },
+    {
+      "id": "d7f631ab-0109-4597-91b7-4a0d69db7330",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T07:41:21.388225"
+    },
+    {
+      "id": "62eb45a0-49af-4271-9e10-d0b68450ec6c",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T07:50:42.459353"
     }
   ],
   "playlist_sources": {
+    "Chill English": "youtube",
     "Boost Energy": "youtube",
     "Deep Bass": "youtube",
     "Remix": "youtube",

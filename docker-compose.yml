@@ -5,6 +5,6 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/data
-      - ${HOME}/Music/MusicManager:/music
+      - ${HOME}/music/music-manager:/music
     env_file: .env
     restart: unless-stopped
