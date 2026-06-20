@@ -157,7 +157,8 @@ def test_tiktok_download_deduplicates_by_url(client, data_dir, music_dir):
     write_songs(SongsFile(songs=[existing], playlists=["TikTok"], devices=[]), data_dir)
     mp3 = _make_mp3(music_dir, "TikTok", "Old.mp3")
 
-    with patch("routers.download.get_file_path", return_value=str(mp3)):
+    with patch("routers.download.get_file_path", return_value=str(mp3)), \
+         patch("routers.download.download_song") as mock_dl:
         res = client.post(
             "/api/download/tiktok",
             json={"url": url},
@@ -165,6 +166,8 @@ def test_tiktok_download_deduplicates_by_url(client, data_dir, music_dir):
         )
 
     assert res.status_code == 200
+    assert mock_dl.call_count == 0
     data = read_songs(data_dir)
     assert len(data.songs) == 1
     assert data.songs[0].device_downloads[DEV].downloaded is True
+    assert data.playlist_sources.get("TikTok") == "tiktok"

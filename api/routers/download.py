@@ -104,34 +104,42 @@ async def download_tiktok(
     device_id: str = Depends(get_device_id),
     settings: Settings = Depends(get_settings),
 ):
-    data = read_songs(settings.data_dir)
-    existing = next((s for s in data.songs if s.url == body.url), None)
+    async with _get_lock(body.url):
+        data = read_songs(settings.data_dir)
+        existing = next((s for s in data.songs if s.url == body.url), None)
 
-    if existing:
-        mp3_path = get_file_path(existing.url, existing.playlist, settings.music_dir)
-        if not mp3_path or not Path(mp3_path).exists():
-            mp3_path = await asyncio.to_thread(download_song, existing.url, existing.playlist, settings.music_dir)
-        song = existing
-    else:
-        mp3_path = await asyncio.to_thread(download_song, body.url, "TikTok", settings.music_dir)
-        song = Song(
-            title=Path(mp3_path).stem,
-            url=body.url,
-            platform="tiktok",
-            playlist="TikTok",
-            manually_added=True,
-        )
-        data.songs.insert(0, song)
-        if "TikTok" not in data.playlists:
-            data.playlists.append("TikTok")
+        if existing:
+            mp3_path = get_file_path(existing.url, existing.playlist, settings.music_dir)
+            if not mp3_path or not Path(mp3_path).exists():
+                try:
+                    mp3_path = await asyncio.to_thread(download_song, existing.url, existing.playlist, settings.music_dir)
+                except Exception as e:
+                    raise HTTPException(status_code=500, detail=str(e).replace('\r', ' ').strip())
+            song = existing
+        else:
+            try:
+                mp3_path = await asyncio.to_thread(download_song, body.url, "TikTok", settings.music_dir)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e).replace('\r', ' ').strip())
+            song = Song(
+                title=Path(mp3_path).stem,
+                url=body.url,
+                platform="tiktok",
+                playlist="TikTok",
+                manually_added=True,
+            )
+            data.songs.insert(0, song)
+            if "TikTok" not in data.playlists:
+                data.playlists.append("TikTok")
+
         data.playlist_sources["TikTok"] = "tiktok"
 
-    if device_id not in song.device_downloads:
-        device = next((d for d in data.devices if d.id == device_id), None)
-        song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
-    song.device_downloads[device_id].downloaded = True
-    song.device_downloads[device_id].downloaded_at = datetime.utcnow()
-    write_songs(data, settings.data_dir)
+        if device_id not in song.device_downloads:
+            device = next((d for d in data.devices if d.id == device_id), None)
+            song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
+        song.device_downloads[device_id].downloaded = True
+        song.device_downloads[device_id].downloaded_at = datetime.utcnow()
+        write_songs(data, settings.data_dir)
 
     filename = Path(mp3_path).name
     content = Path(mp3_path).read_bytes()
