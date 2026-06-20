@@ -40,7 +40,12 @@ async def get_songs(
             **s.model_dump(),
             "downloaded": dd.downloaded if dd else False,
         })
-    return {"songs": songs_out, "playlists": data.playlists, "playlist_sources": data.playlist_sources}
+    playlists = list(data.playlists)
+    if "TikTok" not in playlists:
+        playlists.append("TikTok")
+    playlist_sources = dict(data.playlist_sources)
+    playlist_sources["TikTok"] = "tiktok"
+    return {"songs": songs_out, "playlists": playlists, "playlist_sources": playlist_sources}
 
 
 @router.post("", status_code=201)

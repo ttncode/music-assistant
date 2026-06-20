@@ -73,3 +73,11 @@ def test_delete_song_not_found_returns_ok(client):
     res = client.delete("/api/songs/nonexistent-id", headers=HEADERS)
     assert res.status_code == 200
     assert res.json() == {"ok": True}
+
+
+def test_get_songs_always_includes_tiktok_playlist(client):
+    res = client.get("/api/songs", headers=HEADERS)
+    assert res.status_code == 200
+    data = res.json()
+    assert "TikTok" in data["playlists"]
+    assert data["playlist_sources"]["TikTok"] == "tiktok"
