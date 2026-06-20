@@ -1,5 +1,9 @@
 import yt_dlp
-from pathlib import Path
+
+
+def _sets_url(profile_url: str) -> str:
+    url = profile_url.rstrip('/')
+    return url if url.endswith('/sets') else url + '/sets'
 
 
 def fetch_soundcloud_playlists(profile_url: str) -> list[dict]:
@@ -11,7 +15,7 @@ def fetch_soundcloud_playlists(profile_url: str) -> list[dict]:
     }
     playlists = []
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(profile_url, download=False)
+        info = ydl.extract_info(_sets_url(profile_url), download=False)
         if not info:
             return []
         entries = info.get("entries", [])
