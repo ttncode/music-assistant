@@ -27,6 +27,7 @@ export function Header({ pendingCount, syncRunning, onSync, onSettings, provider
       <div className="flex items-center gap-2">
         <MusicNote size={20} weight="fill" className="text-[var(--color-accent)]" />
         <span className="font-semibold text-sm">Music Assistant</span>
+        <span className="text-[10px] text-[var(--color-text-muted)]">v{__APP_VERSION__}</span>
       </div>
 
       <div className="flex items-center gap-2">

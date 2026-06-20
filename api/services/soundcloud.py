@@ -7,29 +7,38 @@ def _sets_url(profile_url: str) -> str:
 
 
 def fetch_soundcloud_playlists(profile_url: str) -> list[dict]:
-    """Extract all playlists and tracks from a SoundCloud profile using yt-dlp flat extraction."""
-    ydl_opts = {
-        "quiet": True,
-        "extract_flat": "in_playlist",
-        "ignoreerrors": True,
-    }
+    """Extract all playlists and tracks from a SoundCloud profile using yt-dlp.
+
+    Two-step: flat-fetch the /sets page to get playlist URLs, then fully extract
+    each playlist to get track titles, thumbnails, and permalink URLs.
+    """
+    flat_opts = {"quiet": True, "extract_flat": True, "ignoreerrors": True}
+    full_opts = {"quiet": True, "ignoreerrors": True}
     playlists = []
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+    with yt_dlp.YoutubeDL(flat_opts) as ydl:
         info = ydl.extract_info(_sets_url(profile_url), download=False)
         if not info:
             return []
-        entries = info.get("entries", [])
-        for entry in entries:
-            if not entry or entry.get("_type") != "playlist":
+        set_entries = [e for e in (info.get("entries") or []) if e and e.get("url")]
+
+    with yt_dlp.YoutubeDL(full_opts) as ydl:
+        for set_entry in set_entries:
+            set_info = ydl.extract_info(set_entry["url"], download=False)
+            if not set_info:
                 continue
             songs = []
-            for track in entry.get("entries", []) or []:
+            for track in set_info.get("entries", []) or []:
                 if not track:
                     continue
                 songs.append({
-                    "title": track.get("title", track.get("url", "")),
-                    "url": track.get("url", ""),
+                    "title": track.get("title", ""),
+                    "url": track.get("webpage_url") or track.get("url", ""),
                     "thumbnail": track.get("thumbnail", ""),
                 })
-            playlists.append({"title": entry.get("title", ""), "platform": "soundcloud", "songs": songs})
+            playlists.append({
+                "title": set_info.get("title", set_entry.get("title", "")),
+                "platform": "soundcloud",
+                "songs": songs,
+            })
     return playlists
