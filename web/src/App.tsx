@@ -29,7 +29,7 @@ export default function App() {
   const [justDownloaded, setJustDownloaded] = useState<Set<string>>(new Set())
   const [historyVersion, setHistoryVersion] = useState(0)
 
-  const { songs, playlists, playlistSources, pendingCount, refetch, removeSong, addSong } = useSongs()
+  const { songs, playlists, playlistSources, loading, pendingCount, refetch, removeSong, addSong } = useSongs()
   const { toasts, toast, removeToast } = useToast()
 
   const handleSyncComplete = useCallback(({ added, error }: { added: number; error: string | null }) => {
@@ -120,6 +120,7 @@ export default function App() {
           songs={songs}
           activePlaylist={activePlaylist}
           search={search}
+          loading={loading}
           onDelete={handleDelete}
           onDownloaded={refetch}
           onError={(msg) => toast.error(msg)}

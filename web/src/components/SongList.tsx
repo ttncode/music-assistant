@@ -9,6 +9,7 @@ interface Props {
   songs: SongResponse[]
   activePlaylist: string
   search: string
+  loading: boolean
   onDelete: (id: string) => void
   onDownloaded: () => void
   onError: (message: string) => void
@@ -23,6 +24,7 @@ export function SongList({
   songs,
   activePlaylist,
   search,
+  loading,
   onDelete,
   onDownloaded,
   onError,
@@ -37,6 +39,22 @@ export function SongList({
   useEffect(() => {
     setPage(1)
   }, [activePlaylist, search])
+
+  if (loading) {
+    return (
+      <div>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)] animate-pulse">
+            <div className="shrink-0 w-10 h-10 rounded-md bg-[var(--color-surface-elevated)]" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 rounded bg-[var(--color-surface-elevated)] w-3/4" />
+              <div className="h-2.5 rounded bg-[var(--color-surface-elevated)] w-1/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const filtered = songs.filter(s => {
     const matchPlaylist = activePlaylist === 'All' || s.playlist === activePlaylist
@@ -95,7 +113,7 @@ export function SongList({
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
+              className="cursor-pointer p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
               aria-label="Previous page"
             >
               <CaretLeft size={14} />
@@ -106,7 +124,7 @@ export function SongList({
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
+              className="cursor-pointer p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30 transition-colors"
               aria-label="Next page"
             >
               <CaretRight size={14} />
