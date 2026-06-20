@@ -1,5 +1,4 @@
 import asyncio
-import tempfile
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -7,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 from config import Settings, get_settings
-from models import DeviceDownload
+from models import DeviceDownload, Song
 from store import read_songs, write_songs
 from routers.auth import get_device_id
 from services.downloader import download_song, get_file_path
@@ -102,16 +101,42 @@ async def serve_download(
 @router.post("/tiktok")
 async def download_tiktok(
     body: TikTokBody,
-    _: str = Depends(get_device_id),
+    device_id: str = Depends(get_device_id),
     settings: Settings = Depends(get_settings),
 ):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        mp3_path = await asyncio.to_thread(download_song, body.url, "_tiktok_tmp", tmpdir)
-        filename = Path(mp3_path).name
-        content = Path(mp3_path).read_bytes()
+    data = read_songs(settings.data_dir)
+    existing = next((s for s in data.songs if s.url == body.url), None)
 
+    if existing:
+        mp3_path = get_file_path(existing.url, existing.playlist, settings.music_dir)
+        if not mp3_path or not Path(mp3_path).exists():
+            mp3_path = await asyncio.to_thread(download_song, existing.url, existing.playlist, settings.music_dir)
+        song = existing
+    else:
+        mp3_path = await asyncio.to_thread(download_song, body.url, "TikTok", settings.music_dir)
+        song = Song(
+            title=Path(mp3_path).stem,
+            url=body.url,
+            platform="tiktok",
+            playlist="TikTok",
+            manually_added=True,
+        )
+        data.songs.insert(0, song)
+        if "TikTok" not in data.playlists:
+            data.playlists.append("TikTok")
+        data.playlist_sources["TikTok"] = "tiktok"
+
+    if device_id not in song.device_downloads:
+        device = next((d for d in data.devices if d.id == device_id), None)
+        song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
+    song.device_downloads[device_id].downloaded = True
+    song.device_downloads[device_id].downloaded_at = datetime.utcnow()
+    write_songs(data, settings.data_dir)
+
+    filename = Path(mp3_path).name
+    content = Path(mp3_path).read_bytes()
     return Response(
         content=content,
         media_type="audio/mpeg",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename, safe='')}"},
     )

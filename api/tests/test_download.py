@@ -127,3 +127,44 @@ def test_serve_download_not_marked_on_download_failure(client, data_dir):
     assert res.status_code == 500
     updated = next(s for s in read_songs(data_dir).songs if s.id == song.id)
     assert DEV not in updated.device_downloads
+
+
+def test_tiktok_download_adds_song_to_library(client, data_dir, music_dir):
+    mp3 = _make_mp3(music_dir, "TikTok", "Cool Song.mp3")
+
+    with patch("routers.download.download_song", return_value=str(mp3)):
+        res = client.post(
+            "/api/download/tiktok",
+            json={"url": "https://www.tiktok.com/@user/video/123"},
+            headers={"X-Device-ID": DEV},
+        )
+
+    assert res.status_code == 200
+    data = read_songs(data_dir)
+    assert len(data.songs) == 1
+    song = data.songs[0]
+    assert song.platform == "tiktok"
+    assert song.playlist == "TikTok"
+    assert song.url == "https://www.tiktok.com/@user/video/123"
+    assert "TikTok" in data.playlists
+    assert data.playlist_sources["TikTok"] == "tiktok"
+    assert song.device_downloads[DEV].downloaded is True
+
+
+def test_tiktok_download_deduplicates_by_url(client, data_dir, music_dir):
+    url = "https://www.tiktok.com/@user/video/456"
+    existing = Song(title="Old", url=url, platform="tiktok", playlist="TikTok")
+    write_songs(SongsFile(songs=[existing], playlists=["TikTok"], devices=[]), data_dir)
+    mp3 = _make_mp3(music_dir, "TikTok", "Old.mp3")
+
+    with patch("routers.download.get_file_path", return_value=str(mp3)):
+        res = client.post(
+            "/api/download/tiktok",
+            json={"url": url},
+            headers={"X-Device-ID": DEV},
+        )
+
+    assert res.status_code == 200
+    data = read_songs(data_dir)
+    assert len(data.songs) == 1
+    assert data.songs[0].device_downloads[DEV].downloaded is True
