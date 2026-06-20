@@ -162,6 +162,8 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
               Unregister this device
             </button>
           </section>
+
+          <p className="text-[11px] text-[var(--color-text-muted)] pt-2">v{__APP_VERSION__}</p>
         </div>
       </div>
     </div>
