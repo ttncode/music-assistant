@@ -19,6 +19,16 @@ const PLATFORM_UI_LABELS: Record<Platform, string> = {
   tiktok: 'TikTok',
 }
 
+function onWheelHorizontal(e: React.WheelEvent<HTMLDivElement>) {
+  const el = e.currentTarget
+  const canScrollLeft = el.scrollLeft > 0
+  const canScrollRight = el.scrollLeft < el.scrollWidth - el.clientWidth
+  if (e.deltaY !== 0 && (canScrollLeft || canScrollRight)) {
+    e.preventDefault()
+    el.scrollLeft += e.deltaY
+  }
+}
+
 function PlatformIcon({ id, active }: { id: Platform; active: boolean }) {
   const size = 12
   if (id === 'youtube') return <YoutubeLogo size={size} color={active ? 'currentColor' : 'var(--color-platform-youtube)'} />
@@ -55,7 +65,7 @@ export function FilterBar({
   return (
     <>
       <div className="space-y-3 px-4 py-3 border-b border-[var(--color-border)]">
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" onWheel={onWheelHorizontal}>
           {PLATFORM_IDS.map(id => {
             const isActive = activePlatform === id
             return (
@@ -76,7 +86,7 @@ export function FilterBar({
           })}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" onWheel={onWheelHorizontal}>
           {['All', ...playlists].map(pl => {
             const platformLabel = pl !== 'All' ? PLATFORM_LABELS[playlistSources[pl]] : undefined
             return (
