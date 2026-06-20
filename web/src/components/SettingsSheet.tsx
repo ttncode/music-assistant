@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Trash, SignOut, CircleNotch } from '@phosphor-icons/react'
 import { useDevice } from '../hooks/useDevice'
 import { api } from '../lib/api'
@@ -18,6 +18,13 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
   const [confirmText, setConfirmText] = useState('')
   const [clearing, setClearing] = useState(false)
   const [confirmUnregister, setConfirmUnregister] = useState('')
+
+  useEffect(() => {
+    if (!open) {
+      setConfirmText('')
+      setConfirmUnregister('')
+    }
+  }, [open])
 
   async function handleClearHistory() {
     if (!deviceId || confirmText !== CONFIRM_PHRASE) return
