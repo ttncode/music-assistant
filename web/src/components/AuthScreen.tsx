@@ -28,7 +28,19 @@ export function AuthScreen({ onVerified }: Props) {
     <div className="min-h-[100dvh] flex items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">Music Assistant</h1>
-        <p className="text-[var(--color-text-secondary)] text-sm">Enter your access code to continue.</p>
+        <div className="space-y-1">
+          <p className="text-[var(--color-text-secondary)] text-sm">Enter your access code to continue.</p>
+          <p className="text-[var(--color-text-secondary)] text-sm">
+            Don't have an access code? Contact the admin at{' '}
+            <a
+              href="mailto:ttn.dev.fullstack@gmail.com"
+              className="text-[var(--color-accent)] underline-offset-2 hover:underline"
+            >
+              ttn.dev.fullstack@gmail.com
+            </a>
+            {' '}to request one.
+          </p>
+        </div>
 
         <div className="space-y-2">
           <input
