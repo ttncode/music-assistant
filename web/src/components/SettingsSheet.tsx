@@ -7,14 +7,17 @@ interface Props {
   open: boolean
   onClose: () => void
   onHistoryCleared: () => void
+  onUnregistered: () => void
 }
 
 const CONFIRM_PHRASE = 'clear history'
+const UNREGISTER_PHRASE = 'unregister'
 
-export function SettingsSheet({ open, onClose, onHistoryCleared }: Props) {
+export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered }: Props) {
   const { deviceId, deviceName, clear } = useDevice()
   const [confirmText, setConfirmText] = useState('')
   const [clearing, setClearing] = useState(false)
+  const [confirmUnregister, setConfirmUnregister] = useState('')
 
   async function handleClearHistory() {
     if (!deviceId || confirmText !== CONFIRM_PHRASE) return
@@ -28,6 +31,12 @@ export function SettingsSheet({ open, onClose, onHistoryCleared }: Props) {
     }
   }
 
+  function handleUnregister() {
+    if (confirmUnregister !== UNREGISTER_PHRASE) return
+    clear()
+    onUnregistered()
+  }
+
   if (!open) return null
 
   return (
@@ -36,7 +45,7 @@ export function SettingsSheet({ open, onClose, onHistoryCleared }: Props) {
       <div className="relative w-full max-w-sm bg-[var(--color-surface)] h-full overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
           <h2 className="font-semibold text-sm">Settings</h2>
-          <button onClick={onClose} className="p-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
+          <button onClick={onClose} className="cursor-pointer p-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
             <X size={18} />
           </button>
         </div>
@@ -60,7 +69,7 @@ export function SettingsSheet({ open, onClose, onHistoryCleared }: Props) {
             <button
               onClick={handleClearHistory}
               disabled={clearing || confirmText !== CONFIRM_PHRASE}
-              className="flex items-center gap-2 rounded-lg border border-[var(--color-error)]/30 px-3 py-2 text-xs text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors w-full disabled:opacity-40"
+              className="flex items-center gap-2 cursor-pointer rounded-lg border border-[var(--color-error)]/30 px-3 py-2 text-xs text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors w-full disabled:opacity-40"
             >
               {clearing ? <CircleNotch size={14} className="animate-spin" /> : <Trash size={14} />}
               {clearing ? 'Clearing...' : 'Clear download history'}
@@ -72,9 +81,19 @@ export function SettingsSheet({ open, onClose, onHistoryCleared }: Props) {
 
           <section>
             <h3 className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Account</h3>
+            <p className="text-[11px] text-[var(--color-text-muted)] mb-2">
+              This will remove this device. You'll need to re-enter your access code to use it again.
+            </p>
+            <input
+              value={confirmUnregister}
+              onChange={e => setConfirmUnregister(e.target.value)}
+              placeholder={`Type "${UNREGISTER_PHRASE}" to confirm`}
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-error)]/60 transition-colors placeholder:text-[var(--color-text-muted)] mb-2"
+            />
             <button
-              onClick={clear}
-              className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors w-full"
+              onClick={handleUnregister}
+              disabled={confirmUnregister !== UNREGISTER_PHRASE}
+              className="flex items-center gap-2 cursor-pointer rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors w-full disabled:opacity-40"
             >
               <SignOut size={14} />
               Unregister this device

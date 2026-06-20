@@ -155,6 +155,10 @@ export default function App() {
           setHistoryVersion(v => v + 1)
           toast.success('Download history cleared')
         }}
+        onUnregistered={() => {
+          setSettingsOpen(false)
+          setAuthState('needs_code')
+        }}
       />
     </div>
   )
