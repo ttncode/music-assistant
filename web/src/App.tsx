@@ -27,6 +27,7 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [syncVersion, setSyncVersion] = useState(0)
   const [justDownloaded, setJustDownloaded] = useState<Set<string>>(new Set())
+  const [historyVersion, setHistoryVersion] = useState(0)
 
   const { songs, playlists, pendingCount, refetch, removeSong, addSong } = useSongs()
   const { toasts, toast, removeToast } = useToast()
@@ -125,6 +126,7 @@ export default function App() {
           selected={selected}
           onToggle={toggle}
           justDownloaded={justDownloaded}
+          historyVersion={historyVersion}
         />
       </main>
 
@@ -146,7 +148,12 @@ export default function App() {
       <SettingsSheet
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onHistoryCleared={() => { refetch(); toast.success('Download history cleared') }}
+        onHistoryCleared={() => {
+          refetch()
+          setJustDownloaded(new Set())
+          setHistoryVersion(v => v + 1)
+          toast.success('Download history cleared')
+        }}
       />
     </div>
   )

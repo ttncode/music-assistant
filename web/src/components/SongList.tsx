@@ -16,6 +16,7 @@ interface Props {
   selected: Set<string>
   onToggle: (id: string) => void
   justDownloaded: Set<string>
+  historyVersion: number
 }
 
 export function SongList({
@@ -29,6 +30,7 @@ export function SongList({
   selected,
   onToggle,
   justDownloaded,
+  historyVersion,
 }: Props) {
   const [page, setPage] = useState(1)
 
@@ -80,6 +82,7 @@ export function SongList({
           selected={selected.has(song.id)}
           onToggle={onToggle}
           isJustDownloaded={justDownloaded.has(song.id)}
+          historyVersion={historyVersion}
         />
       ))}
 

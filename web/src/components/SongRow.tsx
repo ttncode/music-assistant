@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ArrowCircleDown,
   Check,
@@ -21,6 +21,7 @@ interface Props {
   selected: boolean
   onToggle: (id: string) => void
   isJustDownloaded?: boolean
+  historyVersion: number
 }
 
 const PLATFORM_ICONS = {
@@ -37,9 +38,13 @@ const PLATFORM_COLORS = {
   other: 'var(--color-text-secondary)',
 }
 
-export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, isJustDownloaded }: Props) {
+export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, isJustDownloaded, historyVersion }: Props) {
   const [downloading, setDownloading] = useState(false)
   const [localDownloaded, setLocalDownloaded] = useState(false)
+
+  useEffect(() => {
+    setLocalDownloaded(false)
+  }, [historyVersion])
   const PlatformIcon = PLATFORM_ICONS[song.platform]
 
   const isDownloaded = song.downloaded || isJustDownloaded || localDownloaded
