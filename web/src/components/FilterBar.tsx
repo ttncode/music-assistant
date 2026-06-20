@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { MagnifyingGlass } from '@phosphor-icons/react'
+import { MagnifyingGlass, YoutubeLogo, SoundcloudLogo, TiktokLogo } from '@phosphor-icons/react'
 import { clsx } from 'clsx'
+
+type Platform = 'all' | 'youtube' | 'soundcloud' | 'tiktok'
 
 const PLATFORM_LABELS: Record<string, string> = {
   youtube: 'YouTube',
@@ -8,13 +10,32 @@ const PLATFORM_LABELS: Record<string, string> = {
   tiktok: 'TikTok',
 }
 
+const PLATFORM_IDS: Platform[] = ['all', 'youtube', 'soundcloud', 'tiktok']
+
+const PLATFORM_UI_LABELS: Record<Platform, string> = {
+  all: 'All',
+  youtube: 'YouTube',
+  soundcloud: 'SoundCloud',
+  tiktok: 'TikTok',
+}
+
+function PlatformIcon({ id, active }: { id: Platform; active: boolean }) {
+  const size = 12
+  if (id === 'youtube') return <YoutubeLogo size={size} color={active ? 'currentColor' : 'var(--color-platform-youtube)'} />
+  if (id === 'soundcloud') return <SoundcloudLogo size={size} color={active ? 'currentColor' : 'var(--color-platform-soundcloud)'} />
+  if (id === 'tiktok') return <TiktokLogo size={size} color={active ? 'currentColor' : 'var(--color-platform-tiktok)'} />
+  return null
+}
+
 interface Props {
   playlists: string[]
   activePlaylist: string
   search: string
   playlistSources: Record<string, string>
+  activePlatform: Platform
   onPlaylistChange: (p: string) => void
   onSearchChange: (s: string) => void
+  onPlatformChange: (p: Platform) => void
   onEnterSelectMode: () => void
 }
 
@@ -23,8 +44,10 @@ export function FilterBar({
   activePlaylist,
   search,
   playlistSources,
+  activePlatform,
   onPlaylistChange,
   onSearchChange,
+  onPlatformChange,
   onEnterSelectMode,
 }: Props) {
   const [tooltipInfo, setTooltipInfo] = useState<{ label: string; x: number; y: number } | null>(null)
@@ -32,6 +55,27 @@ export function FilterBar({
   return (
     <>
       <div className="space-y-3 px-4 py-3 border-b border-[var(--color-border)]">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {PLATFORM_IDS.map(id => {
+            const isActive = activePlatform === id
+            return (
+              <button
+                key={id}
+                onClick={() => onPlatformChange(id)}
+                className={clsx(
+                  'shrink-0 cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors flex items-center gap-1.5',
+                  isActive
+                    ? 'bg-[var(--color-accent)] text-white'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)]',
+                )}
+              >
+                <PlatformIcon id={id} active={isActive} />
+                {PLATFORM_UI_LABELS[id]}
+              </button>
+            )
+          })}
+        </div>
+
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
           {['All', ...playlists].map(pl => {
             const platformLabel = pl !== 'All' ? PLATFORM_LABELS[playlistSources[pl]] : undefined

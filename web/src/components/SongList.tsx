@@ -9,6 +9,7 @@ interface Props {
   songs: SongResponse[]
   activePlaylist: string
   search: string
+  activePlatform: 'all' | 'youtube' | 'soundcloud' | 'tiktok'
   loading: boolean
   onDelete: (id: string) => void
   onDownloaded: () => void
@@ -24,6 +25,7 @@ export function SongList({
   songs,
   activePlaylist,
   search,
+  activePlatform,
   loading,
   onDelete,
   onDownloaded,
@@ -38,7 +40,7 @@ export function SongList({
 
   useEffect(() => {
     setPage(1)
-  }, [activePlaylist, search])
+  }, [activePlaylist, search, activePlatform])
 
   if (loading) {
     return (
@@ -60,7 +62,8 @@ export function SongList({
   const filtered = songs.filter(s => {
     const matchPlaylist = activePlaylist === 'All' || s.playlist === activePlaylist
     const matchSearch = !search || s.title.toLowerCase().includes(search.toLowerCase())
-    return matchPlaylist && matchSearch
+    const matchPlatform = activePlatform === 'all' || s.platform === activePlatform
+    return matchPlaylist && matchSearch && matchPlatform
   })
 
   if (songs.length === 0) {

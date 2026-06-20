@@ -28,6 +28,7 @@ export default function App() {
   const [syncVersion, setSyncVersion] = useState(0)
   const [justDownloaded, setJustDownloaded] = useState<Set<string>>(new Set())
   const [historyVersion, setHistoryVersion] = useState(0)
+  const [activePlatform, setActivePlatform] = useState<'all' | 'youtube' | 'soundcloud' | 'tiktok'>('all')
 
   const { songs, playlists, playlistSources, loading, pendingCount, refetch, removeSong, addSong } = useSongs()
   const { toasts, toast, removeToast } = useToast()
@@ -63,7 +64,8 @@ export default function App() {
     .filter(s => {
       const matchPlaylist = activePlaylist === 'All' || s.playlist === activePlaylist
       const matchSearch = !search || s.title.toLowerCase().includes(search.toLowerCase())
-      return matchPlaylist && matchSearch && !s.downloaded
+      const matchPlatform = activePlatform === 'all' || s.platform === activePlatform
+      return matchPlaylist && matchSearch && matchPlatform && !s.downloaded
     })
     .map(s => s.id)
 
@@ -110,8 +112,10 @@ export default function App() {
         activePlaylist={activePlaylist}
         search={search}
         playlistSources={playlistSources}
+        activePlatform={activePlatform}
         onPlaylistChange={setActivePlaylist}
         onSearchChange={setSearch}
+        onPlatformChange={setActivePlatform}
         onEnterSelectMode={enterSelectMode}
       />
 
@@ -120,6 +124,7 @@ export default function App() {
           songs={songs}
           activePlaylist={activePlaylist}
           search={search}
+          activePlatform={activePlatform}
           loading={loading}
           onDelete={handleDelete}
           onDownloaded={refetch}
