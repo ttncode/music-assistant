@@ -72,8 +72,8 @@ export default function App() {
   }, [downloadBatch, selected])
 
   const handleSelectAllUndownloaded = useCallback(() => {
-    selectAll(filteredUndownloadedIds)
-  }, [selectAll, filteredUndownloadedIds])
+    selectAll([...new Set([...selected, ...filteredUndownloadedIds])])
+  }, [selectAll, filteredUndownloadedIds, selected])
 
   const handleDelete = useCallback(async (id: string) => {
     await removeSong(id)
