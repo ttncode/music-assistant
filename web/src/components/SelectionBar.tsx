@@ -38,7 +38,7 @@ export function SelectionBar({
             </span>
             <button
               onClick={onCancelDownload}
-              className="flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:border-[var(--color-error)] transition-colors"
+              className="flex items-center gap-1.5 cursor-pointer rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:border-[var(--color-error)] transition-colors"
             >
               <StopCircle size={14} />
               Cancel
@@ -47,7 +47,7 @@ export function SelectionBar({
         ) : selected.size > 0 ? (
           <button
             onClick={onDownloadSelected}
-            className="flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] text-white px-3 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 cursor-pointer rounded-lg bg-[var(--color-accent)] text-white px-3 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <ArrowCircleDown size={15} />
             Download {selected.size} song{selected.size !== 1 ? 's' : ''}
@@ -57,7 +57,7 @@ export function SelectionBar({
         {!isRunning && filteredUndownloadedIds.length > 0 && (
           <button
             onClick={onSelectAllUndownloaded}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
+            className="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
           >
             {selected.size > 0 ? 'Select All' : 'Select All Undownloaded'}
           </button>
@@ -66,7 +66,7 @@ export function SelectionBar({
         {selected.size > 0 && !isRunning && (
           <button
             onClick={onClearAll}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
           >
             Clear
           </button>
@@ -75,7 +75,7 @@ export function SelectionBar({
         {/* Mobile-only cancel button — exits select mode and clears selection */}
         <button
           onClick={onCancel}
-          className="md:hidden ml-auto p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+          className="md:hidden ml-auto cursor-pointer p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
           aria-label="Cancel selection"
         >
           <X size={16} />

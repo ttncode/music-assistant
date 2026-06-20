@@ -56,7 +56,7 @@ export function Header({ pendingCount, syncRunning, onSync, onSettings, provider
 
         <button
           onClick={onSettings}
-          className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+          className="cursor-pointer p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
           aria-label="Settings"
         >
           <GearSix size={18} />
@@ -65,7 +65,7 @@ export function Header({ pendingCount, syncRunning, onSync, onSettings, provider
         <button
           onClick={onSync}
           disabled={syncRunning}
-          className="relative flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-medium transition-colors hover:border-[var(--color-accent)] disabled:opacity-50"
+          className="relative flex items-center gap-1.5 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-medium transition-colors hover:border-[var(--color-accent)] disabled:opacity-50"
         >
           <motion.span
             animate={syncRunning ? { rotate: 360 } : { rotate: 0 }}

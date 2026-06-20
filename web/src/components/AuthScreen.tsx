@@ -57,7 +57,7 @@ export function AuthScreen({ onVerified }: Props) {
         <button
           type="submit"
           disabled={loading || !code}
-          className="w-full rounded-lg bg-[var(--color-accent)] px-4 py-3 text-sm font-medium text-white disabled:opacity-40 active:scale-[0.98] transition-transform"
+          className="w-full cursor-pointer rounded-lg bg-[var(--color-accent)] px-4 py-3 text-sm font-medium text-white disabled:opacity-40 active:scale-[0.98] transition-transform"
         >
           {loading ? 'Checking...' : 'Continue'}
         </button>

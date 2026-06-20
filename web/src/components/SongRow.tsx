@@ -70,7 +70,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
         onClick={() => onToggle(song.id)}
         aria-label={selected ? 'Deselect song' : 'Select song'}
         className={clsx(
-          'shrink-0 w-4 h-4 rounded border flex items-center justify-center transition-colors',
+          'shrink-0 cursor-pointer w-4 h-4 rounded border flex items-center justify-center transition-colors',
           isSelectMode ? 'flex' : 'hidden md:flex',
           selected
             ? 'border-[var(--color-accent)] bg-[var(--color-accent)]'
@@ -119,7 +119,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
             onClick={handleDownload}
             disabled={downloading}
             className={clsx(
-              'flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
+              'flex items-center gap-1 cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
               downloading
                 ? 'text-[var(--color-text-muted)]'
                 : 'text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]',
@@ -132,7 +132,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
 
         <button
           onClick={() => onDelete(song.id)}
-          className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-all"
+          className="opacity-0 group-hover:opacity-100 cursor-pointer p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-all"
           aria-label="Remove song"
         >
           <X size={13} />
