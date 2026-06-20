@@ -103,7 +103,7 @@ export default function App() {
         providerStatus={providerStatus}
       />
 
-      <TikTokDownload />
+      <TikTokDownload onDownloaded={refetch} />
 
       <AddSongForm playlists={playlists} onAdd={handleAdd} />
 

@@ -2,7 +2,11 @@ import { useState, FormEvent } from 'react'
 import { TiktokLogo, ArrowCircleDown } from '@phosphor-icons/react'
 import { getDevice } from '../lib/device'
 
-export function TikTokDownload() {
+interface Props {
+  onDownloaded?: () => void
+}
+
+export function TikTokDownload({ onDownloaded }: Props) {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,13 +29,18 @@ export function TikTokDownload() {
       if (!res.ok) throw new Error('Download failed')
       const blob = await res.blob()
       const disposition = res.headers.get('content-disposition') ?? ''
-      const filename = disposition.match(/filename="(.+)"/)?.[1] ?? 'tiktok.mp3'
+      const match5987 = disposition.match(/filename\*=UTF-8''([^\s;]+)/i)
+      const matchQuoted = disposition.match(/filename="(.+?)"/)
+      const filename = match5987
+        ? decodeURIComponent(match5987[1])
+        : (matchQuoted?.[1] ?? 'tiktok.mp3')
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
       link.download = filename
       link.click()
       URL.revokeObjectURL(link.href)
       setUrl('')
+      onDownloaded?.()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Download failed')
     } finally {
