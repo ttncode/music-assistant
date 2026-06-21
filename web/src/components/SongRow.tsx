@@ -53,7 +53,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
     setDownloading(true)
     try {
       await api.download.prepare(song.id)
-      await api.download.file(song.id)
+      api.download.file(song.id)
       setLocalDownloaded(true)
       onDownloaded()
     } catch (e) {
