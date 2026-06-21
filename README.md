@@ -24,7 +24,7 @@ A self-hosted personal music manager that syncs YouTube and SoundCloud playlists
 
 ```bash
 # 1. Clone the repo
-git clone <repo-url>
+git clone https://github.com/ttncode/music-assistant.git
 cd music-assistant
 
 # 2. Create your environment file
@@ -39,6 +39,33 @@ open http://localhost:8000
 ```
 
 On first launch you will be prompted for the access code and a name for your device.
+
+### Using the pre-built image
+
+Instead of building from source, pull the published image from GHCR:
+
+```bash
+# Pull latest release
+docker pull ghcr.io/ttncode/music-assistant:latest
+
+# Or pin to a specific version
+docker pull ghcr.io/ttncode/music-assistant:v1.0.0
+```
+
+Then update `docker-compose.yml` to use the pulled image instead of building:
+
+```yaml
+services:
+  app:
+    image: ghcr.io/ttncode/music-assistant:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+      - ${HOME}/music/music-assistant:/music
+    env_file: .env
+    restart: unless-stopped
+```
 
 ## Environment Variables
 
