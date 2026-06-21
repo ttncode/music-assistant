@@ -40,19 +40,21 @@ open http://localhost:8000
 
 On first launch you will be prompted for the access code and a name for your device.
 
-### Using the pre-built image
+## Deploy on a New Machine
 
-Instead of building from source, pull the published image from GHCR:
+### Option A — Pre-built image (recommended)
+
+No git or build toolchain needed — just Docker.
+
+**1. Create a folder and your `.env` file:**
 
 ```bash
-# Pull latest release
-docker pull ghcr.io/ttncode/music-assistant:latest
-
-# Or pin to a specific version
-docker pull ghcr.io/ttncode/music-assistant:v1.0.0
+mkdir music-assistant && cd music-assistant
 ```
 
-Then update `docker-compose.yml` to use the pulled image instead of building:
+Create a `.env` file with your values (see [Environment Variables](#environment-variables) below).
+
+**2. Create a `docker-compose.yml`:**
 
 ```yaml
 services:
@@ -66,6 +68,25 @@ services:
     env_file: .env
     restart: unless-stopped
 ```
+
+To pin to a specific version, replace `:latest` with e.g. `:v1.0.0`.
+
+**3. Start:**
+
+```bash
+docker compose up -d
+```
+
+> **Private image?** If the package is set to private on GHCR, authenticate first:
+> ```bash
+> echo YOUR_GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+> ```
+
+---
+
+### Option B — Build from source
+
+Clone the repo and follow the [Quick Start](#quick-start) steps above.
 
 ## Environment Variables
 
