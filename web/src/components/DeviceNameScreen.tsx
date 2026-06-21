@@ -27,6 +27,7 @@ export function DeviceNameScreen({ onRegistered }: Props) {
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center px-4">
+      <p className="fixed bottom-4 left-0 right-0 text-center text-[10px] text-[var(--color-text-muted)]">v{__APP_VERSION__}</p>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">Name this device</h1>
         <p className="text-[var(--color-text-secondary)] text-sm">

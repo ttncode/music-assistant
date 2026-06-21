@@ -4,6 +4,8 @@ WORKDIR /web
 COPY web/package*.json ./
 RUN npm install
 COPY web/ ./
+ARG APP_VERSION
+ENV APP_VERSION=$APP_VERSION
 RUN npm run build
 
 # Stage 2: Python app with ffmpeg
