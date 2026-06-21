@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react'
+import { MusicNote } from '@phosphor-icons/react'
 import { api } from '../lib/api'
 
 interface Props {
@@ -27,8 +28,12 @@ export function AuthScreen({ onVerified }: Props) {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center px-4">
       <p className="fixed bottom-4 left-0 right-0 text-center text-[10px] text-[var(--color-text-muted)]">v{__APP_VERSION__}</p>
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Music Assistant</h1>
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
+        <div className="flex flex-col items-center gap-1">
+          <MusicNote size={40} weight="fill" className="text-[var(--color-accent)]" />
+          <span className="text-2xl font-semibold tracking-tight">Music Assistant</span>
+        </div>
+
         <div className="space-y-1">
           <p className="text-[var(--color-text-secondary)] text-sm">Enter your access code to continue.</p>
           <p className="text-[var(--color-text-secondary)] text-sm">
