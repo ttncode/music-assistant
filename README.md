@@ -4,21 +4,21 @@ A self-hosted personal music manager that syncs YouTube and SoundCloud playlists
 
 ## Features
 
-- **Playlist sync** — mirrors your YouTube channel playlists and SoundCloud profile (additions, edits, deletions, and song order all stay in sync)
+- **Playlist sync** — mirrors your YouTube channel playlists and SoundCloud profile, keeping additions, edits, deletions, and song order in sync
 - **MP3 downloads** — 320 kbps via yt-dlp + ffmpeg, stored on your machine
-- **Per-device tracking** — each device (phone, laptop) tracks its own download history independently
+- **Per-device tracking** — each device tracks its own download history independently
 - **Batch download** — select multiple songs and download them all at once with progress tracking
 - **TikTok on-demand** — paste a TikTok link for an instant one-off MP3 download
-- **Mobile-first PWA** — works on iPhone/Android via ngrok or any reverse proxy
+- **Platform filtering** — filter your library by YouTube, SoundCloud, or TikTok
+- **Mobile-ready** — works on iPhone, Android, tablet, and desktop
 - **Access code auth** — simple shared code keeps the app private
 - **Dark UI** — React 19 + Tailwind v4, Phosphor icons, Geist font
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
-- A [YouTube Data API v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) key + your channel ID *(optional — skip if you only use SoundCloud)*
-- Your SoundCloud profile URL *(optional — skip if you only use YouTube)*
-- [ngrok](https://ngrok.com/) or a similar tunnel if you want phone access from outside your network
+- A [YouTube Data API v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) key + your channel ID _(optional — skip if you only use SoundCloud)_
+- Your SoundCloud profile URL _(optional — skip if you only use YouTube)_
 
 ## Quick Start
 
@@ -44,23 +44,23 @@ On first launch you will be prompted for the access code and a name for your dev
 
 Create a `.env` file in the project root (copy `.env.example` as a starting point).
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `ACCESS_CODE` | Yes | — | Shared password shown on the login screen |
-| `YOUTUBE_API_KEY` | No | — | YouTube Data API v3 key |
-| `YOUTUBE_CHANNEL_ID` | No | — | Your YouTube channel ID (e.g. `UCxxxxxxxx`) |
-| `SOUNDCLOUD_PROFILE_URL` | No | — | Full URL of your SoundCloud profile |
-| `MUSIC_DIR` | No | `/music` | Where downloaded MP3s are stored inside the container |
-| `DATA_DIR` | No | `/data` | Where `songs.json` and device data are stored inside the container |
+| Variable                 | Required | Default  | Description                                                        |
+| ------------------------ | -------- | -------- | ------------------------------------------------------------------ |
+| `ACCESS_CODE`            | Yes      | —        | Shared password (required to access the app)                       |
+| `YOUTUBE_API_KEY`        | No       | —        | YouTube Data API v3 key                                            |
+| `YOUTUBE_CHANNEL_ID`     | No       | —        | Your YouTube channel ID (e.g. `UCxxxxxxxx`)                        |
+| `SOUNDCLOUD_PROFILE_URL` | No       | —        | Full URL of your SoundCloud profile                                |
+| `MUSIC_DIR`              | No       | `/music` | Where downloaded MP3s are stored inside the container              |
+| `DATA_DIR`               | No       | `/data`  | Where `songs.json` and device data are stored inside the container |
 
 ## Docker Volumes
 
 Two directories are mounted outside the container so your data survives image rebuilds:
 
-| Host path | Container path | Purpose |
-|---|---|---|
-| `./data` | `/data` | Song database (`songs.json`) and device records |
-| `$HOME/Music/MusicManager` | `/music` | Downloaded MP3 files |
+| Host path                  | Container path | Purpose                                         |
+| -------------------------- | -------------- | ----------------------------------------------- |
+| `./data`                   | `/data`        | Song database (`songs.json`) and device records |
+| `$HOME/Music/MusicManager` | `/music`       | Downloaded MP3 files                            |
 
 Change the host paths in `docker-compose.yml` if you want to store files elsewhere.
 
