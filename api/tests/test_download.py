@@ -73,6 +73,39 @@ def _make_mp3(music_dir, playlist, filename):
     return p
 
 
+def test_prepare_calls_download_and_returns_ready(client, data_dir, music_dir):
+    song = Song(title="New Song", url="https://youtube.com/watch?v=new",
+                platform="youtube", playlist="Pop")
+    _seed(data_dir, [song])
+    mp3 = _make_mp3(music_dir, "Pop", "New Song.mp3")
+
+    with patch("routers.download.get_file_path", return_value=None) as mock_path, \
+         patch("routers.download.download_song", return_value=str(mp3)) as mock_dl:
+        mock_path.side_effect = [None, None, str(mp3)]
+        res = client.post(f"/api/download/{song.id}/prepare",
+                          headers={"X-Device-ID": DEV})
+
+    assert res.status_code == 200
+    assert res.json() == {"status": "ready"}
+    mock_dl.assert_called_once()
+
+
+def test_prepare_skips_download_when_file_exists(client, data_dir, music_dir):
+    song = Song(title="Cached Song", url="https://youtube.com/watch?v=cached",
+                platform="youtube", playlist="Pop")
+    _seed(data_dir, [song])
+    mp3 = _make_mp3(music_dir, "Pop", "Cached Song.mp3")
+
+    with patch("routers.download.get_file_path", return_value=str(mp3)), \
+         patch("routers.download.download_song") as mock_dl:
+        res = client.post(f"/api/download/{song.id}/prepare",
+                          headers={"X-Device-ID": DEV})
+
+    assert res.status_code == 200
+    assert res.json() == {"status": "ready"}
+    mock_dl.assert_not_called()
+
+
 def test_serve_download_non_ascii_filename_succeeds(client, data_dir, music_dir):
     """Filenames with non-latin-1 chars (e.g. en dash) must use RFC 5987 encoding."""
     song = Song(title="Song – Dash", url="https://youtube.com/watch?v=dash",

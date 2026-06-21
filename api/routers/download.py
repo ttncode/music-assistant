@@ -13,7 +13,6 @@ from services.downloader import download_song, get_file_path
 
 router = APIRouter(prefix="/api/download", tags=["download"])
 
-_preparing: set[str] = set()  # song IDs currently being prepared
 _download_locks: dict[str, asyncio.Lock] = {}  # per-song-id serialization
 
 
@@ -38,23 +37,15 @@ async def prepare_download(
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
 
-    existing = get_file_path(song.url, song.playlist, settings.music_dir)
-    if existing:
-        return {"status": "ready"}
+    if not get_file_path(song.url, song.playlist, settings.music_dir):
+        async with _get_lock(song_id):
+            if not get_file_path(song.url, song.playlist, settings.music_dir):
+                try:
+                    await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
+                except Exception as e:
+                    raise HTTPException(status_code=500, detail=str(e).replace('\r', ' ').strip())
 
-    if song_id not in _preparing:
-        _preparing.add(song_id)
-        asyncio.create_task(_do_prepare(song_id, song.url, song.playlist, settings.music_dir))
-
-    return {"status": "downloading"}
-
-
-async def _do_prepare(song_id: str, url: str, playlist: str, music_dir: str):
-    async with _get_lock(song_id):
-        try:
-            await asyncio.to_thread(download_song, url, playlist, music_dir)
-        finally:
-            _preparing.discard(song_id)
+    return {"status": "ready"}
 
 
 @router.get("/{song_id}")
