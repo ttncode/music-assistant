@@ -8,6 +8,7 @@ def _path(data_dir: str) -> Path:
 
 def read_songs(data_dir: str) -> SongsFile:
     p = _path(data_dir)
+    p.parent.mkdir(parents=True, exist_ok=True)
     lock = FileLock(str(p) + ".lock")
     with lock:
         if not p.exists():

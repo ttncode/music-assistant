@@ -30,7 +30,7 @@ export default function App() {
   const [historyVersion, setHistoryVersion] = useState(0)
   const [activePlatform, setActivePlatform] = useState<'all' | 'youtube' | 'soundcloud' | 'tiktok'>('all')
 
-  const { songs, playlists, playlistSources, loading, pendingCount, refetch, removeSong, addSong } = useSongs()
+  const { songs, playlists, playlistSources, loading, pendingCount, refetch, removeSong, addSong } = useSongs(authState === 'ready')
   const { toasts, toast, removeToast } = useToast()
 
   const handleSyncComplete = useCallback(({ added, error }: { added: number; error: string | null }) => {

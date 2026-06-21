@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api, SongResponse } from '../lib/api'
 
-export function useSongs() {
+export function useSongs(enabled = true) {
   const [songs, setSongs] = useState<SongResponse[]>([])
   const [playlists, setPlaylists] = useState<string[]>([])
   const [playlistSources, setPlaylistSources] = useState<Record<string, string>>({})
@@ -23,10 +23,11 @@ export function useSongs() {
   }, [])
 
   useEffect(() => {
+    if (!enabled) return
     fetch()
     const id = setInterval(fetch, 10_000)
     return () => clearInterval(id)
-  }, [fetch])
+  }, [fetch, enabled])
 
   const removeSong = useCallback(async (id: string) => {
     setSongs(prev => prev.filter(s => s.id !== id))
