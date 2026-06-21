@@ -1,8 +1,12 @@
-# Music Assistant
+<p align="center">
+  <img src="web/public/icons/icon-512.png" alt="Music Assistant" width="120" />
+</p>
 
-A self-hosted personal music manager that syncs YouTube and SoundCloud playlists and delivers MP3s to any device.
+<h1 align="center">Music Assistant</h1>
 
-## Features
+<p align="center">A self-hosted personal music manager that syncs YouTube and SoundCloud playlists and delivers MP3s to any device.</p>
+
+## ✨ Features
 
 - **Playlist sync** — mirrors your YouTube channel playlists and SoundCloud profile, keeping additions, edits, deletions, and song order in sync
 - **MP3 downloads** — 320 kbps via yt-dlp + ffmpeg, stored on your machine
@@ -13,6 +17,20 @@ A self-hosted personal music manager that syncs YouTube and SoundCloud playlists
 - **Mobile-ready** — works on iPhone, Android, tablet, and desktop
 - **Access code auth** — simple shared code keeps the app private
 - **Dark UI** — React 19 + Tailwind v4, Phosphor icons, Geist font
+
+## 🎧 Supported Platforms
+
+<p>
+  <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" />
+  <img src="https://img.shields.io/badge/SoundCloud-FF3300?style=for-the-badge&logo=soundcloud&logoColor=white" alt="SoundCloud" />
+  <img src="https://img.shields.io/badge/TikTok-000000?style=for-the-badge&logo=tiktok&logoColor=white" alt="TikTok" />
+</p>
+
+| Platform | What's supported |
+|---|---|
+| **YouTube** | Syncs all playlists from your channel automatically |
+| **SoundCloud** | Syncs all public playlists from your profile |
+| **TikTok** | On-demand downloads via paste-a-link |
 
 ## Prerequisites
 
