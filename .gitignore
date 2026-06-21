@@ -18,3 +18,6 @@ web/.vite/
 # Local build artifacts
 web/tsconfig.tsbuildinfo
 data/songs.json.lock
+
+# Superpowers internal tooling
+.superpowers/
