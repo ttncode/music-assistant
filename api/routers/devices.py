@@ -19,12 +19,12 @@ class RenameBody(BaseModel):
 
 
 def dedup_devices(data: SongsFile) -> None:
-    seen: dict[str, bool] = {}
+    seen: set[str] = set()
     kept = []
     for device in data.devices:
         key = device.name.strip().lower()
         if key not in seen:
-            seen[key] = True
+            seen.add(key)
             kept.append(device)
     data.devices = kept
 

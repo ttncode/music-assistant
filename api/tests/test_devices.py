@@ -72,18 +72,24 @@ def test_clear_history(client, data_dir):
 def test_register_returns_existing_device_for_same_name(client):
     res1 = client.post("/api/devices/register", json={"name": "My Phone"})
     res2 = client.post("/api/devices/register", json={"name": "My Phone"})
+    assert res1.status_code == 201
+    assert res2.status_code == 200
     assert res1.json()["id"] == res2.json()["id"]
 
 
 def test_register_case_insensitive(client):
     res1 = client.post("/api/devices/register", json={"name": "My Phone"})
     res2 = client.post("/api/devices/register", json={"name": "my phone"})
+    assert res1.status_code == 201
+    assert res2.status_code == 200
     assert res1.json()["id"] == res2.json()["id"]
 
 
 def test_register_trims_whitespace(client):
     res1 = client.post("/api/devices/register", json={"name": " My Phone "})
     res2 = client.post("/api/devices/register", json={"name": "My Phone"})
+    assert res1.status_code == 201
+    assert res2.status_code == 200
     assert res1.json()["id"] == res2.json()["id"]
 
 
