@@ -266,6 +266,17 @@
       "manually_added": false
     },
     {
+      "id": "caaf26ed-f4cc-44f9-aae4-dfafa4a1edaa",
+      "title": "Mashup Mộng Ức x Ngọn Gió Đêm Qua, Ánh Trăng Đêm Nay - Quinvy Mix",
+      "url": "https://soundcloud.com/doctaim3p/mashup-m-ng-c-x-ng-n-gi-m-qua",
+      "platform": "soundcloud",
+      "playlist": "Remix",
+      "thumbnail": "https://i1.sndcdn.com/artworks-9KGugNQirwVsOAXM-e7gQXw-original.jpg",
+      "added_at": "2026-06-20T09:01:51.928459",
+      "device_downloads": {},
+      "manually_added": false
+    },
+    {
       "id": "184748b7-a7db-49eb-9361-ecb63db62264",
       "title": "[LYRICS] TRÚ MƯA COVER (HKT) Nhạc Trending Tiktok | NHẠC NÀY AI HÁT 🔥",
       "url": "https://www.youtube.com/watch?v=pRnkw2aVoeQ",
@@ -2477,13 +2488,18 @@
       "id": "62eb45a0-49af-4271-9e10-d0b68450ec6c",
       "name": "Home Laptop",
       "last_seen": "2026-06-20T07:50:42.459353"
+    },
+    {
+      "id": "624df467-59a6-413f-baf9-c7af8eb704d3",
+      "name": "Home Laptop",
+      "last_seen": "2026-06-20T07:55:45.803909"
     }
   ],
   "playlist_sources": {
     "Chill English": "youtube",
     "Boost Energy": "youtube",
     "Deep Bass": "youtube",
-    "Remix": "youtube",
+    "Remix": "soundcloud",
     "Saxophone": "youtube",
     "Live Chill": "youtube",
     "Chill": "youtube",
