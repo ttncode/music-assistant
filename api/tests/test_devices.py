@@ -67,3 +67,40 @@ def test_clear_history(client, data_dir):
     assert res.status_code == 200
     data = read_songs(data_dir)
     assert data.songs[0].device_downloads[dev_id].downloaded is False
+
+
+def test_register_returns_existing_device_for_same_name(client):
+    res1 = client.post("/api/devices/register", json={"name": "My Phone"})
+    res2 = client.post("/api/devices/register", json={"name": "My Phone"})
+    assert res1.json()["id"] == res2.json()["id"]
+
+
+def test_register_case_insensitive(client):
+    res1 = client.post("/api/devices/register", json={"name": "My Phone"})
+    res2 = client.post("/api/devices/register", json={"name": "my phone"})
+    assert res1.json()["id"] == res2.json()["id"]
+
+
+def test_register_trims_whitespace(client):
+    res1 = client.post("/api/devices/register", json={"name": " My Phone "})
+    res2 = client.post("/api/devices/register", json={"name": "My Phone"})
+    assert res1.json()["id"] == res2.json()["id"]
+
+
+def test_register_creates_new_for_different_name(client):
+    res1 = client.post("/api/devices/register", json={"name": "My Phone"})
+    res2 = client.post("/api/devices/register", json={"name": "Other Device"})
+    assert res1.json()["id"] != res2.json()["id"]
+
+
+def test_dedup_devices_removes_duplicates(client, data_dir):
+    from store import read_songs, write_songs
+    from models import SongsFile, Device
+    d1 = Device(name="TTN iPhone")
+    d2 = Device(name="TTN iPhone")
+    write_songs(SongsFile(songs=[], playlists=[], devices=[d1, d2]), data_dir)
+    # Trigger register with same name — dedup runs inside register
+    client.post("/api/devices/register", json={"name": "TTN iPhone"})
+    data = read_songs(data_dir)
+    iphone_devices = [d for d in data.devices if d.name.strip().lower() == "ttn iphone"]
+    assert len(iphone_devices) == 1

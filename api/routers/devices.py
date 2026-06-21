@@ -1,7 +1,9 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from config import Settings, get_settings
-from models import Device
+from models import Device, SongsFile
 from store import read_songs, write_songs
 from routers.auth import get_device_id
 
@@ -16,10 +18,28 @@ class RenameBody(BaseModel):
     name: str
 
 
+def dedup_devices(data: SongsFile) -> None:
+    seen: dict[str, bool] = {}
+    kept = []
+    for device in data.devices:
+        key = device.name.strip().lower()
+        if key not in seen:
+            seen[key] = True
+            kept.append(device)
+    data.devices = kept
+
+
 @router.post("/register", status_code=201)
 async def register_device(body: RegisterBody, settings: Settings = Depends(get_settings)):
     data = read_songs(settings.data_dir)
-    device = Device(name=body.name)
+    dedup_devices(data)
+    normalized = body.name.strip().lower()
+    existing = next((d for d in data.devices if d.name.strip().lower() == normalized), None)
+    if existing:
+        existing.last_seen = datetime.utcnow()
+        write_songs(data, settings.data_dir)
+        return JSONResponse(status_code=200, content={"id": existing.id, "name": existing.name})
+    device = Device(name=body.name.strip())
     data.devices.append(device)
     write_songs(data, settings.data_dir)
     return {"id": device.id, "name": device.name}
