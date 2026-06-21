@@ -73,10 +73,14 @@ export const api = {
       return `/api/download/${songId}?device_id=${device?.id ?? ''}`
     },
     file: (songId: string): void => {
+      // Synchronous anchor click: preserves browser user-gesture context and avoids
+      // iOS Safari blob-URL revocation issues. Download errors surface as native
+      // browser dialogs; the prepare() call above already validates file accessibility.
       const device = getDevice()
       const url = `/api/download/${songId}?device_id=${device?.id ?? ''}`
       const a = document.createElement('a')
       a.href = url
+      a.download = '' // let server Content-Disposition set filename
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

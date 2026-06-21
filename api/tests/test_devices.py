@@ -96,6 +96,8 @@ def test_register_trims_whitespace(client):
 def test_register_creates_new_for_different_name(client):
     res1 = client.post("/api/devices/register", json={"name": "My Phone"})
     res2 = client.post("/api/devices/register", json={"name": "Other Device"})
+    assert res1.status_code == 201
+    assert res2.status_code == 201
     assert res1.json()["id"] != res2.json()["id"]
 
 
