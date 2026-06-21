@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="web/public/icons/icon-512.png" alt="Music Assistant" width="120" />
+  <img src="web/public/icons/logo.svg" alt="Music Assistant" width="120" />
 </p>
 
 <h1 align="center">Music Assistant</h1>
