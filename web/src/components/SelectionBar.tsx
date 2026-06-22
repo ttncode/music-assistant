@@ -6,11 +6,13 @@ interface Props {
   isRunning: boolean
   progress: { current: number; total: number } | null
   filteredUndownloadedIds: string[]
+  awaitingGesture: boolean
   onDownloadSelected: () => void
   onSelectAllUndownloaded: () => void
   onClearAll: () => void
   onCancel: () => void
   onCancelDownload: () => void
+  downloadNext: () => void
 }
 
 export function SelectionBar({
@@ -19,22 +21,42 @@ export function SelectionBar({
   isRunning,
   progress,
   filteredUndownloadedIds,
+  awaitingGesture,
   onDownloadSelected,
   onSelectAllUndownloaded,
   onClearAll,
   onCancel,
   onCancelDownload,
+  downloadNext,
 }: Props) {
-  // Visible when desktop has a selection, or mobile is in select mode
   if (selected.size === 0 && !isSelectMode) return null
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-20 border-t border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
       <div className="flex items-center gap-2 max-w-2xl mx-auto px-4 py-3 flex-wrap">
-        {isRunning && progress ? (
+        {awaitingGesture && progress ? (
+          <>
+            <button
+              onClick={downloadNext}
+              className="flex-1 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[var(--color-accent)] text-white px-3 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <ArrowCircleDown size={15} />
+              Tap to download ({progress.current + 1} of {progress.total})
+            </button>
+            <button
+              onClick={onCancelDownload}
+              className="flex items-center gap-1.5 cursor-pointer rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:border-[var(--color-error)] transition-colors"
+            >
+              <StopCircle size={14} />
+              Cancel
+            </button>
+          </>
+        ) : isRunning && progress ? (
           <>
             <span className="flex-1 text-sm text-[var(--color-text-secondary)]">
-              Downloading {progress.current} of {progress.total}...
+              {progress.current === 0
+                ? `Preparing ${progress.total} song${progress.total !== 1 ? 's' : ''}…`
+                : `Downloading ${progress.current} of ${progress.total}…`}
             </span>
             <button
               onClick={onCancelDownload}
@@ -54,7 +76,7 @@ export function SelectionBar({
           </button>
         ) : null}
 
-        {!isRunning && filteredUndownloadedIds.length > 0 && (
+        {!isRunning && !awaitingGesture && filteredUndownloadedIds.length > 0 && (
           <button
             onClick={onSelectAllUndownloaded}
             className="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
@@ -63,7 +85,7 @@ export function SelectionBar({
           </button>
         )}
 
-        {selected.size > 0 && !isRunning && (
+        {selected.size > 0 && !isRunning && !awaitingGesture && (
           <button
             onClick={onClearAll}
             className="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"

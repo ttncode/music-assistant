@@ -49,7 +49,9 @@ export default function App() {
   const { status: providerStatus } = useProviderStatus(syncVersion)
   const { selected, isSelectMode, toggle, selectAll, clearAll, enterSelectMode, exitSelectMode } = useSelection()
 
-  const { downloadBatch, cancel: cancelDownload, progress, isRunning } = useBatchDownload({
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  const { downloadBatch, downloadNext, cancel: cancelDownload, progress, isRunning, awaitingGesture } = useBatchDownload({
+    manual: isIOS,
     onSongDownloaded: (id) => setJustDownloaded(prev => new Set([...prev, id])),
     onComplete: (downloaded, failed) => {
       refetch()
@@ -144,11 +146,13 @@ export default function App() {
         isRunning={isRunning}
         progress={progress}
         filteredUndownloadedIds={filteredUndownloadedIds}
+        awaitingGesture={awaitingGesture}
         onDownloadSelected={handleDownloadSelected}
         onSelectAllUndownloaded={handleSelectAllUndownloaded}
         onClearAll={clearAll}
         onCancel={exitSelectMode}
         onCancelDownload={cancelDownload}
+        downloadNext={downloadNext}
       />
 
       <Toaster toasts={toasts} onRemove={removeToast} />
