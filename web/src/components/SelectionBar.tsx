@@ -1,4 +1,4 @@
-import { ArrowCircleDown, X, StopCircle } from '@phosphor-icons/react'
+import { ArrowCircleDown, X, StopCircle, CircleNotch } from '@phosphor-icons/react'
 
 interface Props {
   selected: Set<string>
@@ -53,7 +53,10 @@ export function SelectionBar({
           </>
         ) : isRunning && progress ? (
           <>
-            <span className="flex-1 text-sm text-[var(--color-text-secondary)]">
+            <span className="flex-1 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+              {progress.current === 0 && (
+                <CircleNotch size={15} className="animate-spin shrink-0" />
+              )}
               {progress.current === 0
                 ? `Preparing ${progress.total} song${progress.total !== 1 ? 's' : ''}…`
                 : `Downloading ${progress.current} of ${progress.total}…`}
