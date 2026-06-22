@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   ArrowCircleDown,
   Check,
@@ -20,6 +20,7 @@ interface Props {
   isSelectMode: boolean
   selected: boolean
   onToggle: (id: string) => void
+  onEnterSelectMode: () => void
   isJustDownloaded?: boolean
   historyVersion: number
 }
@@ -38,16 +39,51 @@ const PLATFORM_COLORS = {
   other: 'var(--color-text-secondary)',
 }
 
-export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, isJustDownloaded, historyVersion }: Props) {
+const MOVE_SLOP = 8
+
+export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, onEnterSelectMode, isJustDownloaded, historyVersion }: Props) {
   const [downloading, setDownloading] = useState(false)
   const [localDownloaded, setLocalDownloaded] = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     setLocalDownloaded(false)
   }, [historyVersion])
-  const PlatformIcon = PLATFORM_ICONS[song.platform]
 
+  const PlatformIcon = PLATFORM_ICONS[song.platform]
   const isDownloaded = song.downloaded || isJustDownloaded || localDownloaded
+
+  function cancelLongPress() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0]
+    touchStart.current = { x: touch.clientX, y: touch.clientY }
+    if (!isSelectMode) {
+      longPressTimer.current = setTimeout(() => {
+        navigator.vibrate?.(30)
+        onEnterSelectMode()
+        onToggle(song.id)
+      }, 300)
+    }
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!touchStart.current) return
+    const touch = e.touches[0]
+    const dx = Math.abs(touch.clientX - touchStart.current.x)
+    const dy = Math.abs(touch.clientY - touchStart.current.y)
+    if (dx > MOVE_SLOP || dy > MOVE_SLOP) cancelLongPress()
+  }
+
+  function handleTouchEnd() {
+    cancelLongPress()
+  }
 
   async function handleDownload() {
     setDownloading(true)
@@ -64,7 +100,12 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors group">
+    <div
+      className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors group"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Checkbox */}
       <button
         onClick={() => onToggle(song.id)}

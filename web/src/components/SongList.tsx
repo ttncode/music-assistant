@@ -17,6 +17,7 @@ interface Props {
   isSelectMode: boolean
   selected: Set<string>
   onToggle: (id: string) => void
+  onEnterSelectMode: () => void
   justDownloaded: Set<string>
   historyVersion: number
 }
@@ -33,6 +34,7 @@ export function SongList({
   isSelectMode,
   selected,
   onToggle,
+  onEnterSelectMode,
   justDownloaded,
   historyVersion,
 }: Props) {
@@ -103,6 +105,7 @@ export function SongList({
           isSelectMode={isSelectMode}
           selected={selected.has(song.id)}
           onToggle={onToggle}
+          onEnterSelectMode={onEnterSelectMode}
           isJustDownloaded={justDownloaded.has(song.id)}
           historyVersion={historyVersion}
         />

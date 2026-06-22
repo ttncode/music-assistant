@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MagnifyingGlass, YoutubeLogo, SoundcloudLogo, TiktokLogo } from '@phosphor-icons/react'
+import { CheckSquare, MagnifyingGlass, YoutubeLogo, SoundcloudLogo, TiktokLogo } from '@phosphor-icons/react'
 import { clsx } from 'clsx'
 
 type Platform = 'all' | 'youtube' | 'soundcloud' | 'tiktok'
@@ -110,22 +110,26 @@ export function FilterBar({
             )
           })}
 
-          <button
-            onClick={onEnterSelectMode}
-            className="md:hidden shrink-0 cursor-pointer rounded-full px-3 py-1 text-xs font-medium bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
-          >
-            Select
-          </button>
         </div>
 
-        <div className="relative">
-          <MagnifyingGlass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-          <input
-            value={search}
-            onChange={e => onSearchChange(e.target.value)}
-            placeholder="Search songs..."
-            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-4 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors placeholder:text-[var(--color-text-muted)]"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <MagnifyingGlass size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <input
+              value={search}
+              onChange={e => onSearchChange(e.target.value)}
+              placeholder="Search songs..."
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-4 py-2 text-sm outline-none focus:border-[var(--color-accent)] transition-colors placeholder:text-[var(--color-text-muted)]"
+            />
+          </div>
+          <button
+            onClick={onEnterSelectMode}
+            aria-label="Enter select mode"
+            className="md:hidden shrink-0 cursor-pointer flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
+          >
+            <CheckSquare size={14} />
+            Select
+          </button>
         </div>
       </div>
 

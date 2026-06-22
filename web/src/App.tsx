@@ -132,6 +132,7 @@ export default function App() {
           isSelectMode={isSelectMode}
           selected={selected}
           onToggle={toggle}
+          onEnterSelectMode={enterSelectMode}
           justDownloaded={justDownloaded}
           historyVersion={historyVersion}
         />
