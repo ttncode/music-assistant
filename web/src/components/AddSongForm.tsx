@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { Plus, CircleNotch, YoutubeLogo, SoundcloudLogo } from '@phosphor-icons/react'
+import { Plus, CircleNotch, YoutubeLogo, SoundcloudLogo, ClipboardText } from '@phosphor-icons/react'
 
 interface Props {
   playlists: string[]
@@ -14,6 +14,13 @@ export function AddSongForm({ playlists, onAdd }: Props) {
   const [error, setError] = useState('')
 
   const effectivePlaylist = newPlaylist.trim() || playlist || 'Default'
+
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (text) setUrl(text.trim())
+    } catch { /* permission denied or unavailable */ }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -38,12 +45,22 @@ export function AddSongForm({ playlists, onAdd }: Props) {
         <SoundcloudLogo size={11} color="var(--color-platform-soundcloud)" />
         Add to library
       </p>
-      <input
-        value={url}
-        onChange={e => setUrl(e.target.value)}
-        placeholder="Paste YouTube or SoundCloud URL..."
-        className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-accent)] transition-colors placeholder:text-[var(--color-text-muted)]"
-      />
+      <div className="relative">
+        <input
+          value={url}
+          onChange={e => setUrl(e.target.value)}
+          placeholder="Paste YouTube or SoundCloud URL..."
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 pr-9 text-sm outline-none focus:border-[var(--color-accent)] transition-colors placeholder:text-[var(--color-text-muted)]"
+        />
+        <button
+          type="button"
+          onClick={handlePaste}
+          aria-label="Paste from clipboard"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+        >
+          <ClipboardText size={15} />
+        </button>
+      </div>
 
       <div className="flex gap-2">
         <select
