@@ -1,4 +1,4 @@
-import { ArrowCircleDown, X, StopCircle, CircleNotch } from '@phosphor-icons/react'
+import { ArrowCircleDown, X, StopCircle, CircleNotch, ShareNetwork } from '@phosphor-icons/react'
 
 interface Props {
   selected: Set<string>
@@ -7,12 +7,14 @@ interface Props {
   progress: { current: number; total: number } | null
   filteredUndownloadedIds: string[]
   awaitingGesture: boolean
+  awaitingShare: boolean
   onDownloadSelected: () => void
   onSelectAllUndownloaded: () => void
   onClearAll: () => void
   onCancel: () => void
   onCancelDownload: () => void
   downloadNext: () => void
+  shareAll: () => void
 }
 
 export function SelectionBar({
@@ -22,19 +24,38 @@ export function SelectionBar({
   progress,
   filteredUndownloadedIds,
   awaitingGesture,
+  awaitingShare,
   onDownloadSelected,
   onSelectAllUndownloaded,
   onClearAll,
   onCancel,
   onCancelDownload,
   downloadNext,
+  shareAll,
 }: Props) {
   if (selected.size === 0 && !isSelectMode) return null
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-20 border-t border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
       <div className="flex items-center gap-2 max-w-2xl mx-auto px-4 py-3 flex-wrap">
-        {awaitingGesture && progress ? (
+        {awaitingShare && progress ? (
+          <>
+            <button
+              onClick={shareAll}
+              className="flex-1 flex items-center justify-center gap-1.5 cursor-pointer rounded-lg bg-[var(--color-accent)] text-white px-3 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <ShareNetwork size={15} />
+              Save {progress.total} song{progress.total !== 1 ? 's' : ''} to Files
+            </button>
+            <button
+              onClick={onCancelDownload}
+              className="flex items-center gap-1.5 cursor-pointer rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-error)] hover:border-[var(--color-error)] transition-colors"
+            >
+              <StopCircle size={14} />
+              Cancel
+            </button>
+          </>
+        ) : awaitingGesture && progress ? (
           <>
             <button
               onClick={downloadNext}
@@ -79,7 +100,7 @@ export function SelectionBar({
           </button>
         ) : null}
 
-        {!isRunning && !awaitingGesture && filteredUndownloadedIds.length > 0 && (
+        {!isRunning && !awaitingGesture && !awaitingShare && filteredUndownloadedIds.length > 0 && (
           <button
             onClick={onSelectAllUndownloaded}
             className="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
@@ -88,7 +109,7 @@ export function SelectionBar({
           </button>
         )}
 
-        {selected.size > 0 && !isRunning && !awaitingGesture && (
+        {selected.size > 0 && !isRunning && !awaitingGesture && !awaitingShare && (
           <button
             onClick={onClearAll}
             className="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"

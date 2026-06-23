@@ -50,8 +50,14 @@ export default function App() {
   const { selected, isSelectMode, toggle, selectAll, clearAll, enterSelectMode, exitSelectMode } = useSelection()
 
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
-  const { downloadBatch, downloadNext, cancel: cancelDownload, progress, isRunning, awaitingGesture } = useBatchDownload({
-    manual: isIOS,
+  const canShareFiles = isIOS &&
+    typeof navigator.share === 'function' &&
+    typeof navigator.canShare === 'function' &&
+    navigator.canShare({ files: [new File([], 'test.mp3', { type: 'audio/mpeg' })] })
+  const batchMode = canShareFiles ? 'share' : isIOS ? 'tap-per-song' : 'auto'
+
+  const { downloadBatch, downloadNext, shareAll, cancel: cancelDownload, progress, isRunning, awaitingGesture, awaitingShare } = useBatchDownload({
+    mode: batchMode,
     onSongDownloaded: (id) => setJustDownloaded(prev => new Set([...prev, id])),
     onComplete: (downloaded, failed) => {
       refetch()
@@ -147,12 +153,14 @@ export default function App() {
         progress={progress}
         filteredUndownloadedIds={filteredUndownloadedIds}
         awaitingGesture={awaitingGesture}
+        awaitingShare={awaitingShare}
         onDownloadSelected={handleDownloadSelected}
         onSelectAllUndownloaded={handleSelectAllUndownloaded}
         onClearAll={clearAll}
         onCancel={exitSelectMode}
         onCancelDownload={cancelDownload}
         downloadNext={downloadNext}
+        shareAll={shareAll}
       />
 
       <Toaster toasts={toasts} onRemove={removeToast} />
