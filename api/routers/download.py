@@ -9,17 +9,9 @@ from config import Settings, get_settings
 from models import DeviceDownload, Song
 from store import read_songs, write_songs
 from routers.auth import get_device_id
-from services.downloader import download_song, get_file_path
+from services.downloader import download_song, get_file_path, _get_lock
 
 router = APIRouter(prefix="/api/download", tags=["download"])
-
-_download_locks: dict[str, asyncio.Lock] = {}  # per-song-id serialization
-
-
-def _get_lock(song_id: str) -> asyncio.Lock:
-    if song_id not in _download_locks:
-        _download_locks[song_id] = asyncio.Lock()
-    return _download_locks[song_id]
 
 
 class TikTokBody(BaseModel):

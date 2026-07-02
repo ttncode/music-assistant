@@ -1,6 +1,15 @@
+import asyncio
 import re
 from pathlib import Path
 import yt_dlp
+
+_download_locks: dict[str, asyncio.Lock] = {}
+
+
+def _get_lock(song_id: str) -> asyncio.Lock:
+    if song_id not in _download_locks:
+        _download_locks[song_id] = asyncio.Lock()
+    return _download_locks[song_id]
 
 
 def _sanitize(name: str) -> str:
@@ -59,3 +68,14 @@ def download_song(url: str, playlist: str, music_dir: str) -> str:
     sidecar.write_text(mp3_path)
 
     return mp3_path
+
+
+def remove_song_files(url: str, playlist: str, music_dir: str) -> None:
+    """Delete the MP3 and its sidecar for this URL, if they exist."""
+    safe_playlist = _sanitize(playlist)
+    folder = Path(music_dir) / safe_playlist
+    sidecar = folder / f".{_url_hash(url)}.done"
+    if sidecar.exists():
+        mp3_path = sidecar.read_text().strip()
+        Path(mp3_path).unlink(missing_ok=True)
+        sidecar.unlink(missing_ok=True)

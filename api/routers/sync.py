@@ -1,5 +1,4 @@
 import asyncio
-from pathlib import Path
 from fastapi import APIRouter, BackgroundTasks, Depends
 from config import Settings, get_settings
 from models import Song, SongsFile
@@ -8,7 +7,7 @@ from routers.auth import get_device_id
 from routers.songs import detect_platform
 from services.youtube import fetch_youtube_playlists
 from services.soundcloud import fetch_soundcloud_playlists
-from services.downloader import download_song, get_file_path
+from services.downloader import download_song, get_file_path, _get_lock, remove_song_files
 
 router = APIRouter(prefix="/api/sync", tags=["sync"])
 
@@ -36,10 +35,12 @@ async def _auto_prepare_all(settings: Settings) -> None:
     data = read_songs(settings.data_dir)
     for song in data.songs:
         if not get_file_path(song.url, song.playlist, settings.music_dir):
-            try:
-                await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
-            except Exception:
-                pass  # non-fatal: skip and continue to next song
+            async with _get_lock(song.id):
+                if not get_file_path(song.url, song.playlist, settings.music_dir):
+                    try:
+                        await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
+                    except Exception:
+                        pass  # non-fatal: skip and continue to next song
 
 
 async def _run_sync(settings: Settings):
@@ -94,12 +95,10 @@ async def _run_sync(settings: Settings):
         sync_songs_by_url = {s.url: s for s in data.songs if is_sync_managed(s)}
         manual_songs = [s for s in data.songs if not is_sync_managed(s)]
 
-        # Delete MP3 files for songs that are no longer in the source playlist
+        # Delete MP3 files and sidecars for songs no longer in the source playlist
         stale_songs = [s for url, s in sync_songs_by_url.items() if url not in source_by_url]
         for stale in stale_songs:
-            mp3_path = get_file_path(stale.url, stale.playlist, settings.music_dir)
-            if mp3_path:
-                Path(mp3_path).unlink(missing_ok=True)
+            remove_song_files(stale.url, stale.playlist, settings.music_dir)
 
         # Rebuild sync songs from source, preserving existing ids and device_downloads
         new_sync_songs: list[Song] = []
