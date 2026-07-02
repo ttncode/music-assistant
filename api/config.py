@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     soundcloud_profile_url: str = ""
     music_dir: str = "/music"
     data_dir: str = "/data"
+    auto_prepare: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 

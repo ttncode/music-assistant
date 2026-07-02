@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from config import get_settings, Settings
 from routers import auth, devices, songs, sync, download, status
-from routers.sync import _run_sync
+from routers.sync import _run_sync, _auto_prepare_all
 
 
 async def _maybe_auto_sync(settings: Settings) -> None:
@@ -19,7 +19,10 @@ async def _maybe_auto_sync(settings: Settings) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await _maybe_auto_sync(get_settings())
+    settings = get_settings()
+    await _maybe_auto_sync(settings)
+    if settings.auto_prepare:
+        asyncio.create_task(_auto_prepare_all(settings))
     yield
 
 
