@@ -213,7 +213,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
             </span>
           )}
           {song.prepared && !isDownloaded && (
-            <span className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-green-500 ring-1 ring-[var(--color-bg)]" />
+            <span className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 ring-1 ring-[var(--color-bg)]" />
           )}
         </div>
 
