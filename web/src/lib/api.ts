@@ -29,6 +29,7 @@ export interface SongResponse {
   thumbnail: string
   added_at: string
   downloaded: boolean
+  prepared: boolean
 }
 
 export interface SongsListResponse {

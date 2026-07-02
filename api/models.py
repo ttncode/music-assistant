@@ -24,7 +24,8 @@ class Song(BaseModel):
     thumbnail: str = ""
     added_at: datetime = Field(default_factory=datetime.utcnow)
     device_downloads: dict[str, DeviceDownload] = Field(default_factory=dict)
-    manually_added: bool = False  # True only for songs added via the API, not sync
+    manually_added: bool = False
+    prepared: bool = False
 
 
 class Device(BaseModel):

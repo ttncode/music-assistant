@@ -212,6 +212,9 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
               <CheckCircle size={13} weight="fill" className="text-[var(--color-accent)]" />
             </span>
           )}
+          {song.prepared && !isDownloaded && (
+            <span className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-[var(--color-text-muted)] ring-1 ring-[var(--color-bg)]" />
+          )}
         </div>
 
         {/* Info */}

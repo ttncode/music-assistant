@@ -32,10 +32,20 @@ async def prepare_download(
     if not get_file_path(song.url, song.playlist, settings.music_dir):
         async with _get_lock(song_id):
             if not get_file_path(song.url, song.playlist, settings.music_dir):
+                print(f"[prepare] {song.title} — downloading…")
                 try:
                     await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
+                    print(f"[prepare] {song.title} — ready")
                 except Exception as e:
+                    print(f"[prepare] {song.title} — failed: {e}")
                     raise HTTPException(status_code=500, detail=str(e).replace('\r', ' ').strip())
+    else:
+        if not song.prepared:
+            print(f"[prepare] {song.title} — already on disk, marking prepared")
+
+    if not song.prepared:
+        song.prepared = True
+        write_songs(data, settings.data_dir)
 
     return {"status": "ready"}
 
@@ -69,13 +79,13 @@ async def serve_download(
         headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename, safe='')}"},
     )
 
-    # Mark as downloaded only after the response is successfully constructed
     if device_id not in song.device_downloads:
         device = next((d for d in data.devices if d.id == device_id), None)
         device_name = device.name if device else "Unknown"
         song.device_downloads[device_id] = DeviceDownload(name=device_name)
     song.device_downloads[device_id].downloaded = True
     song.device_downloads[device_id].downloaded_at = datetime.utcnow()
+    song.prepared = True
     write_songs(data, settings.data_dir)
 
     return response
@@ -122,6 +132,7 @@ async def download_tiktok(
             song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
         song.device_downloads[device_id].downloaded = True
         song.device_downloads[device_id].downloaded_at = datetime.utcnow()
+        song.prepared = True
         write_songs(data, settings.data_dir)
 
     filename = Path(mp3_path).name

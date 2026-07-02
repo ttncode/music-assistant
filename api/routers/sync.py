@@ -33,14 +33,26 @@ async def sync_status(_: str = Depends(get_device_id)):
 
 async def _auto_prepare_all(settings: Settings) -> None:
     data = read_songs(settings.data_dir)
+    changed = False
     for song in data.songs:
-        if not get_file_path(song.url, song.playlist, settings.music_dir):
+        if get_file_path(song.url, song.playlist, settings.music_dir):
+            if not song.prepared:
+                print(f"[auto-prepare] {song.title} — already on disk, marking prepared")
+                song.prepared = True
+                changed = True
+        else:
             async with _get_lock(song.id):
                 if not get_file_path(song.url, song.playlist, settings.music_dir):
+                    print(f"[auto-prepare] {song.title} — downloading…")
                     try:
                         await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
-                    except Exception:
-                        pass  # non-fatal: skip and continue to next song
+                        print(f"[auto-prepare] {song.title} — ready")
+                        song.prepared = True
+                        changed = True
+                    except Exception as e:
+                        print(f"[auto-prepare] {song.title} — failed: {e}")
+    if changed:
+        write_songs(data, settings.data_dir)
 
 
 async def _run_sync(settings: Settings):
@@ -98,6 +110,7 @@ async def _run_sync(settings: Settings):
         # Delete MP3 files and sidecars for songs no longer in the source playlist
         stale_songs = [s for url, s in sync_songs_by_url.items() if url not in source_by_url]
         for stale in stale_songs:
+            print(f"[sync] stale file removed: {stale.title}")
             remove_song_files(stale.url, stale.playlist, settings.music_dir)
 
         # Rebuild sync songs from source, preserving existing ids and device_downloads
