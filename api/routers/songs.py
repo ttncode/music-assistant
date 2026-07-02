@@ -39,7 +39,6 @@ async def get_songs(
         songs_out.append({
             **s.model_dump(),
             "downloaded": dd.downloaded if dd else False,
-            "prepared": s.prepared,
         })
     playlists = list(data.playlists)
     if "TikTok" not in playlists:
