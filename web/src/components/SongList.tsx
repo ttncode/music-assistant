@@ -121,11 +121,13 @@ export function SongList({
         />
       ))}
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border)]">
-          <span className="text-xs text-[var(--color-text-muted)]">
-            {start + 1}-{Math.min(start + PAGE_SIZE, filtered.length)} of {filtered.length}
-          </span>
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border)]">
+        <span className="text-xs text-[var(--color-text-muted)]">
+          {totalPages > 1
+            ? `${start + 1}-${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length}`
+            : `${filtered.length} song${filtered.length !== 1 ? 's' : ''}`}
+        </span>
+        {totalPages > 1 && (
           <div className="flex items-center gap-1">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -147,8 +149,8 @@ export function SongList({
               <CaretRight size={14} />
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
