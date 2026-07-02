@@ -20,6 +20,7 @@ interface Props {
   onEnterSelectMode: () => void
   justDownloaded: Set<string>
   historyVersion: number
+  isBatchRunning: boolean
 }
 
 export function SongList({
@@ -37,8 +38,13 @@ export function SongList({
   onEnterSelectMode,
   justDownloaded,
   historyVersion,
+  isBatchRunning,
 }: Props) {
   const [page, setPage] = useState(1)
+  const [downloadingCount, setDownloadingCount] = useState(0)
+
+  function handleDownloadStart() { setDownloadingCount(c => c + 1) }
+  function handleDownloadEnd() { setDownloadingCount(c => Math.max(0, c - 1)) }
 
   useEffect(() => {
     setPage(1)
@@ -108,6 +114,10 @@ export function SongList({
           onEnterSelectMode={onEnterSelectMode}
           isJustDownloaded={justDownloaded.has(song.id)}
           historyVersion={historyVersion}
+          anyDownloading={downloadingCount > 0}
+          isBatchRunning={isBatchRunning}
+          onDownloadStart={handleDownloadStart}
+          onDownloadEnd={handleDownloadEnd}
         />
       ))}
 

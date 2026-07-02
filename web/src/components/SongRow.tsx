@@ -24,6 +24,10 @@ interface Props {
   onEnterSelectMode: () => void
   isJustDownloaded?: boolean
   historyVersion: number
+  anyDownloading: boolean
+  isBatchRunning: boolean
+  onDownloadStart: () => void
+  onDownloadEnd: () => void
 }
 
 const PLATFORM_ICONS = {
@@ -44,7 +48,7 @@ const DELETE_WIDTH = 64
 const SNAP_THRESHOLD = 40
 const MOVE_SLOP = 8
 
-export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, onEnterSelectMode, isJustDownloaded, historyVersion }: Props) {
+export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, onEnterSelectMode, isJustDownloaded, historyVersion, anyDownloading, isBatchRunning, onDownloadStart, onDownloadEnd }: Props) {
   const [downloading, setDownloading] = useState(false)
   const [localDownloaded, setLocalDownloaded] = useState(false)
   const [swipeX, setSwipeXState] = useState(0)
@@ -100,6 +104,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
 
   const PlatformIcon = PLATFORM_ICONS[song.platform]
   const isDownloaded = song.downloaded || isJustDownloaded || localDownloaded
+  const isDisabled = downloading || anyDownloading || isBatchRunning
 
   function handleTouchStart(e: React.TouchEvent) {
     const touch = e.touches[0]
@@ -129,6 +134,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
   }
 
   async function handleDownload() {
+    onDownloadStart()
     setDownloading(true)
     try {
       await api.download.prepare(song.id)
@@ -139,6 +145,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
       onError(e instanceof Error ? e.message : 'Download failed')
     } finally {
       setDownloading(false)
+      onDownloadEnd()
     }
   }
 
@@ -228,12 +235,14 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
           {!isDownloaded && (
             <button
               onClick={handleDownload}
-              disabled={downloading}
+              disabled={isDisabled}
               className={clsx(
                 'flex items-center gap-1 cursor-pointer rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
                 downloading
                   ? 'text-[var(--color-text-muted)]'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]',
+                  : isDisabled
+                    ? 'text-[var(--color-text-muted)] opacity-50'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]',
               )}
             >
               <ArrowCircleDown size={14} className={downloading ? 'animate-spin' : ''} />

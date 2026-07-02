@@ -143,6 +143,7 @@ export default function App() {
           onEnterSelectMode={enterSelectMode}
           justDownloaded={justDownloaded}
           historyVersion={historyVersion}
+          isBatchRunning={isRunning}
         />
       </main>
 
