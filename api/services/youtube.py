@@ -41,7 +41,7 @@ async def _get_playlist_items(client: httpx.AsyncClient, api_key: str, playlist_
         for item in data.get("items", []):
             s = item["snippet"]
             vid_id = s.get("resourceId", {}).get("videoId", "")
-            if not vid_id:
+            if not vid_id or s.get("title") in ("Private video", "Deleted video"):
                 continue
             thumb = s.get("thumbnails", {}).get("high", {}).get("url", "")
             songs.append({
