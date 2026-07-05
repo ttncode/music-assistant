@@ -34,6 +34,25 @@ async def sync_status(_: str = Depends(get_device_id)):
     return _status
 
 
+_UNAVAILABLE_TITLES = {"Private video", "Deleted video"}
+
+
+def _clean_unavailable_songs(settings: Settings) -> None:
+    data = read_songs(settings.data_dir)
+    keep, removed = [], 0
+    for song in data.songs:
+        if song.title in _UNAVAILABLE_TITLES:
+            logger.info(f"🧹 [clean] removing unavailable song: {song.url}")
+            remove_song_files(song.url, song.playlist, settings.music_dir)
+            removed += 1
+        else:
+            keep.append(song)
+    if removed:
+        data.songs = keep
+        write_songs(data, settings.data_dir)
+        logger.info(f"✅ [clean] removed {removed} unavailable song(s) from library")
+
+
 async def _auto_prepare_all(settings: Settings) -> None:
     data = read_songs(settings.data_dir)
     to_mark: set[str] = set()
