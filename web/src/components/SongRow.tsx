@@ -3,6 +3,8 @@ import {
   ArrowCircleDown,
   Check,
   CheckCircle,
+  CircleNotch,
+  HardDrive,
   Trash,
   X,
   SoundcloudLogo,
@@ -213,7 +215,9 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
             </span>
           )}
           {song.prepared && !isDownloaded && (
-            <span className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 ring-1 ring-[var(--color-bg)]" />
+            <span className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-[var(--color-bg)] flex items-center justify-center">
+              <HardDrive size={11} weight="fill" className="text-emerald-500" />
+            </span>
           )}
         </div>
 
@@ -248,7 +252,10 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
                     : 'text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]',
               )}
             >
-              <ArrowCircleDown size={14} className={downloading ? 'animate-spin' : ''} />
+              {downloading
+                ? <CircleNotch size={14} className="animate-spin" />
+                : <ArrowCircleDown size={14} />
+              }
               {downloading ? 'Preparing...' : 'Download'}
             </button>
           )}
