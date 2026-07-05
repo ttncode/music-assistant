@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from fastapi import APIRouter, BackgroundTasks, Depends
 from config import Settings, get_settings
 from models import Song, SongsFile
@@ -8,6 +9,8 @@ from routers.songs import detect_platform
 from services.youtube import fetch_youtube_playlists
 from services.soundcloud import fetch_soundcloud_playlists
 from services.downloader import download_song, get_file_path, _get_lock, remove_song_files
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/sync", tags=["sync"])
 
@@ -37,18 +40,18 @@ async def _auto_prepare_all(settings: Settings) -> None:
     for song in data.songs:
         if get_file_path(song.url, song.playlist, settings.music_dir):
             if not song.prepared:
-                print(f"[auto-prepare] {song.title} — already on disk, marking prepared")
+                logger.info(f"✅ [auto-prepare] {song.title} — already on disk, marking prepared")
                 to_mark.add(song.id)
         else:
             async with _get_lock(song.id):
                 if not get_file_path(song.url, song.playlist, settings.music_dir):
-                    print(f"[auto-prepare] {song.title} — downloading…")
+                    logger.info(f"👉 [auto-prepare] {song.title} — downloading…")
                     try:
                         await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
-                        print(f"[auto-prepare] {song.title} — ready")
+                        logger.info(f"✅ [auto-prepare] {song.title} — ready")
                         to_mark.add(song.id)
                     except Exception as e:
-                        print(f"[auto-prepare] {song.title} — failed: {e}")
+                        logger.error(f"❌ [auto-prepare] {song.title} — failed: {e}")
     if to_mark:
         fresh = read_songs(settings.data_dir)
         changed = False
@@ -115,7 +118,7 @@ async def _run_sync(settings: Settings):
         # Delete MP3 files and sidecars for songs no longer in the source playlist
         stale_songs = [s for url, s in sync_songs_by_url.items() if url not in source_by_url]
         for stale in stale_songs:
-            print(f"[sync] stale file removed: {stale.title}")
+            logger.info(f"🧹 [sync] stale file removed: {stale.title}")
             remove_song_files(stale.url, stale.playlist, settings.music_dir)
 
         # Rebuild sync songs from source, preserving existing ids and device_downloads

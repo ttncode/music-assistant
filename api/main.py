@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
@@ -7,6 +8,14 @@ from fastapi.responses import FileResponse
 from config import get_settings, Settings
 from routers import auth, devices, songs, sync, download, status
 from routers.sync import _run_sync, _auto_prepare_all
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
 
 
 async def _maybe_auto_sync(settings: Settings) -> None:
@@ -19,6 +28,7 @@ async def _maybe_auto_sync(settings: Settings) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("🚀 Music Assistant starting")
     settings = get_settings()
     await _maybe_auto_sync(settings)
     if settings.auto_prepare:

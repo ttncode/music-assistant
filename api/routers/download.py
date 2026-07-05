@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -10,6 +11,8 @@ from models import DeviceDownload, Song
 from store import read_songs, write_songs
 from routers.auth import get_device_id
 from services.downloader import download_song, get_file_path, _get_lock
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/download", tags=["download"])
 
@@ -32,16 +35,16 @@ async def prepare_download(
     if not get_file_path(song.url, song.playlist, settings.music_dir):
         async with _get_lock(song_id):
             if not get_file_path(song.url, song.playlist, settings.music_dir):
-                print(f"[prepare] {song.title} — downloading…")
+                logger.info(f"👉 [prepare] {song.title} — downloading…")
                 try:
                     await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
-                    print(f"[prepare] {song.title} — ready")
+                    logger.info(f"✅ [prepare] {song.title} — ready")
                 except Exception as e:
-                    print(f"[prepare] {song.title} — failed: {e}")
+                    logger.error(f"❌ [prepare] {song.title} — failed: {e}")
                     raise HTTPException(status_code=500, detail=str(e).replace('\r', ' ').strip())
     else:
         if not song.prepared:
-            print(f"[prepare] {song.title} — already on disk, marking prepared")
+            logger.info(f"✅ [prepare] {song.title} — already on disk, marking prepared")
 
     if not song.prepared:
         song.prepared = True
