@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from config import get_settings, Settings
 from routers import auth, devices, songs, sync, download, status
-from routers.sync import _run_sync, _auto_prepare_all, _clean_unavailable_songs
+from routers.sync import _run_sync, _auto_prepare_all
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,7 +30,6 @@ async def _maybe_auto_sync(settings: Settings) -> None:
 async def lifespan(app: FastAPI):
     logger.info("🚀 Music Assistant starting")
     settings = get_settings()
-    _clean_unavailable_songs(settings)
     await _maybe_auto_sync(settings)
     if settings.auto_prepare:
         asyncio.create_task(_auto_prepare_all(settings))
