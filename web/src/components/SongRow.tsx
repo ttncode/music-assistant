@@ -4,7 +4,6 @@ import {
   Check,
   CheckCircle,
   CircleNotch,
-  HardDrive,
   Trash,
   X,
   SoundcloudLogo,
@@ -212,11 +211,6 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
           {isDownloaded && (
             <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-[var(--color-bg)] flex items-center justify-center">
               <CheckCircle size={13} weight="fill" className="text-[var(--color-accent)]" />
-            </span>
-          )}
-          {song.prepared && !isDownloaded && (
-            <span className="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-[var(--color-bg)] flex items-center justify-center">
-              <HardDrive size={11} weight="fill" className="text-emerald-500" />
             </span>
           )}
         </div>
