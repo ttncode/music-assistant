@@ -10,13 +10,19 @@ from config import get_settings, Settings
 from routers import auth, devices, songs, sync, download, status
 from routers.sync import _run_sync, _auto_prepare_all
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+_LOG_FMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+_LOG_DATEFMT = "%Y-%m-%d %H:%M:%S"
+
+logging.basicConfig(level=logging.INFO, format=_LOG_FMT, datefmt=_LOG_DATEFMT)
 
 logger = logging.getLogger("__main__")
+
+
+def _apply_log_format_to_uvicorn() -> None:
+    formatter = logging.Formatter(fmt=_LOG_FMT, datefmt=_LOG_DATEFMT)
+    for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
+        for handler in logging.getLogger(name).handlers:
+            handler.setFormatter(formatter)
 
 
 async def _maybe_auto_sync(settings: Settings) -> None:
@@ -29,6 +35,7 @@ async def _maybe_auto_sync(settings: Settings) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    _apply_log_format_to_uvicorn()
     settings = get_settings()
     tz_name = datetime.now().astimezone().tzname()
 
