@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"🌏 Timezone: {tz_name}")
     logger.info("👉 Loading configuration")
     logger.info(f"⚙️  _Environment: {settings.app_env}")
-    logger.info(f"⚙️  _Auto-prepare: {'enabled' if settings.auto_prepare else 'disabled'}")
+    logger.info(f"⚙️  _Auto Prepare: {'enabled' if settings.auto_prepare else 'disabled'}")
     logger.info(f"⚙️  _YouTube: {'configured' if settings.youtube_api_key and settings.youtube_channel_id else 'not configured'}")
     logger.info(f"⚙️  _SoundCloud: {'configured' if settings.soundcloud_profile_url else 'not configured'}")
     logger.info("✅ Configuration loaded")

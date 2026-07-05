@@ -37,21 +37,20 @@ async def sync_status(_: str = Depends(get_device_id)):
 async def _auto_prepare_all(settings: Settings) -> None:
     data = read_songs(settings.data_dir)
     to_mark: set[str] = set()
+    logger.info("👉 Auto prepare all undownloaded songs")
     for song in data.songs:
         if get_file_path(song.url, song.playlist, settings.music_dir):
             if not song.prepared:
-                logger.info(f"✅ [auto-prepare] {song.title} — already on disk, marking prepared")
                 to_mark.add(song.id)
         else:
             async with _get_lock(song.id):
                 if not get_file_path(song.url, song.playlist, settings.music_dir):
-                    logger.info(f"👉 [auto-prepare] {song.title} — downloading…")
+                    logger.info(f"👉 Downloading - {song.title}...")
                     try:
                         await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
-                        logger.info(f"✅ [auto-prepare] {song.title} — ready")
                         to_mark.add(song.id)
                     except Exception as e:
-                        logger.error(f"❌ [auto-prepare] {song.title} — failed: {e}")
+                        logger.error(f"❌ Failed - {song.title}: {e}")
     if to_mark:
         fresh = read_songs(settings.data_dir)
         changed = False
@@ -61,6 +60,7 @@ async def _auto_prepare_all(settings: Settings) -> None:
                 changed = True
         if changed:
             write_songs(fresh, settings.data_dir)
+    logger.info("✅ Prepared all songs")
 
 
 async def _run_sync(settings: Settings):
