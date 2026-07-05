@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -15,7 +16,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("__main__")
 
 
 async def _maybe_auto_sync(settings: Settings) -> None:
@@ -28,11 +29,23 @@ async def _maybe_auto_sync(settings: Settings) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 Music Assistant starting")
     settings = get_settings()
+    tz_name = datetime.now().astimezone().tzname()
+
+    logger.info(f"🚀 Booting the system - {settings.app_name} v{settings.app_version}")
+    logger.info(f"🌏 Timezone: {tz_name}")
+    logger.info("👉 Loading configuration")
+    logger.info(f"⚙️  _Environment: {settings.app_env}")
+    logger.info(f"⚙️  _Auto-prepare: {'enabled' if settings.auto_prepare else 'disabled'}")
+    logger.info(f"⚙️  _YouTube: {'configured' if settings.youtube_api_key and settings.youtube_channel_id else 'not configured'}")
+    logger.info(f"⚙️  _SoundCloud: {'configured' if settings.soundcloud_profile_url else 'not configured'}")
+    logger.info("✅ Configuration loaded")
+
     await _maybe_auto_sync(settings)
     if settings.auto_prepare:
         asyncio.create_task(_auto_prepare_all(settings))
+
+    logger.info(f"🚀 Booted successfully - {settings.app_name} v{settings.app_version}")
     yield
 
 

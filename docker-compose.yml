@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: music-assistant
     build: .
     ports:
       - "8000:8000"
