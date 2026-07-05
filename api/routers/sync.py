@@ -45,7 +45,7 @@ async def _auto_prepare_all(settings: Settings) -> None:
         else:
             async with _get_lock(song.id):
                 if not get_file_path(song.url, song.playlist, settings.music_dir):
-                    logger.info(f"👉 Downloading - {song.title}...")
+                    logger.info(f"👉 Downloading - {song.title}")
                     try:
                         await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
                         to_mark.add(song.id)
