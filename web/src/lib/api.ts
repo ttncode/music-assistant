@@ -62,6 +62,7 @@ export const api = {
     list: () => req<SongsListResponse>('GET', '/api/songs'),
     add: (url: string, playlist?: string) => req<SongResponse>('POST', '/api/songs', { url, playlist }),
     delete: (id: string) => req<{ ok: boolean }>('DELETE', `/api/songs/${id}`),
+    markDownloaded: (id: string) => req<{ ok: boolean }>('POST', `/api/songs/${id}/mark-downloaded`),
   },
   sync: {
     trigger: () => req<{ message: string }>('POST', '/api/sync'),

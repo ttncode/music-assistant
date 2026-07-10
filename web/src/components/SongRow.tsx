@@ -48,6 +48,7 @@ const PLATFORM_COLORS = {
 const DELETE_WIDTH = 64
 const SNAP_THRESHOLD = 40
 const MOVE_SLOP = 8
+const MARK_WIDTH = 64
 
 export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, selected, onToggle, onEnterSelectMode, isJustDownloaded, historyVersion, anyDownloading, isBatchRunning, onDownloadStart, onDownloadEnd }: Props) {
   const [downloading, setDownloading] = useState(false)
@@ -94,7 +95,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
       }
       if (swipeDragging.current) {
         e.preventDefault()
-        const newX = Math.max(Math.min(touchStart.current.baseSwipeX + dx, 0), -DELETE_WIDTH)
+        const newX = Math.max(Math.min(touchStart.current.baseSwipeX + dx, MARK_WIDTH), -DELETE_WIDTH)
         swipeXRef.current = newX
         setSwipeXState(newX)
       }
@@ -129,7 +130,8 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
     if (!swipeDragging.current) return
     swipeDragging.current = false
     setSnapping(true)
-    const target = swipeXRef.current < -SNAP_THRESHOLD ? -DELETE_WIDTH : 0
+    const x = swipeXRef.current
+    const target = x > SNAP_THRESHOLD ? MARK_WIDTH : x < -SNAP_THRESHOLD ? -DELETE_WIDTH : 0
     swipeXRef.current = target
     setSwipeXState(target)
   }
@@ -150,8 +152,30 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
     }
   }
 
+  async function handleMarkDownloaded() {
+    setSwipeX(0)
+    try {
+      await api.songs.markDownloaded(song.id)
+      setLocalDownloaded(true)
+      onDownloaded()
+    } catch (e) {
+      onError(e instanceof Error ? e.message : 'Failed to mark as downloaded')
+    }
+  }
+
   return (
     <div className="relative overflow-hidden border-b border-[var(--color-border)]">
+      {/* Mobile mark-as-downloaded button — sits behind row content, revealed by swiping right */}
+      {swipeX > 0 && (
+        <button
+          onClick={handleMarkDownloaded}
+          aria-label="Mark as downloaded"
+          className="absolute left-0 top-0 bottom-0 w-16 md:hidden flex items-center justify-center bg-green-500 text-white"
+        >
+          <CheckCircle size={18} />
+        </button>
+      )}
+
       {/* Mobile delete button — sits behind row content, revealed by swiping left */}
       <button
         onClick={() => onDelete(song.id)}
@@ -167,6 +191,13 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
         <div
           className="absolute inset-y-0 left-0 z-10"
           style={{ right: DELETE_WIDTH }}
+          onClick={() => setSwipeX(0)}
+        />
+      )}
+      {swipeX > 0 && (
+        <div
+          className="absolute inset-y-0 right-0 z-10"
+          style={{ left: MARK_WIDTH }}
           onClick={() => setSwipeX(0)}
         />
       )}
@@ -251,6 +282,16 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
                 : <ArrowCircleDown size={14} />
               }
               {downloading ? 'Preparing...' : 'Download'}
+            </button>
+          )}
+
+          {!isDownloaded && (
+            <button
+              onClick={handleMarkDownloaded}
+              className="opacity-0 group-hover:opacity-100 cursor-pointer p-1 rounded text-[var(--color-text-muted)] hover:text-green-500 transition-all hidden md:flex"
+              aria-label="Mark as downloaded"
+            >
+              <CheckCircle size={13} />
             </button>
           )}
 
