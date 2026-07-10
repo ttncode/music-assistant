@@ -131,7 +131,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
     swipeDragging.current = false
     setSnapping(true)
     const x = swipeXRef.current
-    const target = x > SNAP_THRESHOLD ? MARK_WIDTH : x < -SNAP_THRESHOLD ? -DELETE_WIDTH : 0
+    const target = x > SNAP_THRESHOLD && !isDownloaded ? MARK_WIDTH : x < -SNAP_THRESHOLD ? -DELETE_WIDTH : 0
     swipeXRef.current = target
     setSwipeXState(target)
   }

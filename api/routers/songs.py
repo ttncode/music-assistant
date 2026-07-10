@@ -97,8 +97,8 @@ async def mark_downloaded(
     dd = song.device_downloads.get(device_id)
     if dd and dd.downloaded:
         return {"ok": True}
-    device = next((d for d in data.devices if d.id == device_id), None)
-    if device_id not in song.device_downloads:
+    if dd is None:
+        device = next((d for d in data.devices if d.id == device_id), None)
         song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
     song.device_downloads[device_id].downloaded = True
     song.device_downloads[device_id].downloaded_at = datetime.utcnow()
