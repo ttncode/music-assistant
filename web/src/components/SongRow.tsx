@@ -166,7 +166,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
   return (
     <div className="relative overflow-hidden border-b border-[var(--color-border)]">
       {/* Mobile mark-as-downloaded button — sits behind row content, revealed by swiping right */}
-      {swipeX > 0 && (
+      {swipeX > 0 && !isDownloaded && (
         <button
           onClick={handleMarkDownloaded}
           aria-label="Mark as downloaded"
