@@ -1,8 +1,9 @@
 import re
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from config import Settings, get_settings
-from models import Song
+from models import DeviceDownload, Song
 from store import read_songs, write_songs
 from routers.auth import get_device_id
 
@@ -79,5 +80,27 @@ async def delete_song(
 ):
     data = read_songs(settings.data_dir)
     data.songs = [s for s in data.songs if s.id != song_id]
+    write_songs(data, settings.data_dir)
+    return {"ok": True}
+
+
+@router.post("/{song_id}/mark-downloaded")
+async def mark_downloaded(
+    song_id: str,
+    device_id: str = Depends(get_device_id),
+    settings: Settings = Depends(get_settings),
+):
+    data = read_songs(settings.data_dir)
+    song = next((s for s in data.songs if s.id == song_id), None)
+    if not song:
+        raise HTTPException(status_code=404, detail="Song not found")
+    dd = song.device_downloads.get(device_id)
+    if dd and dd.downloaded:
+        return {"ok": True}
+    device = next((d for d in data.devices if d.id == device_id), None)
+    if device_id not in song.device_downloads:
+        song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
+    song.device_downloads[device_id].downloaded = True
+    song.device_downloads[device_id].downloaded_at = datetime.utcnow()
     write_songs(data, settings.data_dir)
     return {"ok": True}
