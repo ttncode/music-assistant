@@ -71,6 +71,9 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
     setSwipeXState(x)
   }
 
+  const isDownloaded = song.downloaded || isJustDownloaded || localDownloaded
+  const revealWidth = isDownloaded ? DELETE_WIDTH : MARK_WIDTH + DELETE_WIDTH
+
   // Non-passive touchmove listener so e.preventDefault() can block page scroll
   // during a confirmed horizontal swipe. JSX onTouchMove is passive and cannot
   // call preventDefault().
@@ -95,17 +98,16 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
       }
       if (swipeDragging.current) {
         e.preventDefault()
-        const newX = Math.max(Math.min(touchStart.current.baseSwipeX + dx, MARK_WIDTH), -DELETE_WIDTH)
+        const newX = Math.max(Math.min(touchStart.current.baseSwipeX + dx, 0), -revealWidth)
         swipeXRef.current = newX
         setSwipeXState(newX)
       }
     }
     el.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => el.removeEventListener('touchmove', onTouchMove)
-  }, [isSelectMode])
+  }, [isSelectMode, revealWidth])
 
   const PlatformIcon = PLATFORM_ICONS[song.platform]
-  const isDownloaded = song.downloaded || isJustDownloaded || localDownloaded
   const isDisabled = downloading || anyDownloading || isBatchRunning
 
   function handleTouchStart(e: React.TouchEvent) {
@@ -131,7 +133,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
     swipeDragging.current = false
     setSnapping(true)
     const x = swipeXRef.current
-    const target = x > SNAP_THRESHOLD && !isDownloaded ? MARK_WIDTH : x < -SNAP_THRESHOLD ? -DELETE_WIDTH : 0
+    const target = x < -SNAP_THRESHOLD ? -revealWidth : 0
     swipeXRef.current = target
     setSwipeXState(target)
   }
@@ -165,21 +167,24 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
 
   return (
     <div className="relative overflow-hidden border-b border-[var(--color-border)]">
-      {/* Mobile mark-as-downloaded button — sits behind row content, revealed by swiping right */}
-      {swipeX > 0 && !isDownloaded && (
+      {/* Mobile mark-as-downloaded button — revealed by swiping left, sits left of the remove button */}
+      {!isDownloaded && (
         <button
           onClick={handleMarkDownloaded}
           aria-label="Mark as downloaded"
-          className="absolute left-0 top-0 bottom-0 w-16 md:hidden flex items-center justify-center bg-green-500 text-white"
+          title="Mark as downloaded"
+          className="absolute top-0 bottom-0 w-16 md:hidden flex items-center justify-center bg-[var(--color-accent)] text-white"
+          style={{ right: DELETE_WIDTH }}
         >
           <CheckCircle size={18} />
         </button>
       )}
 
-      {/* Mobile delete button — sits behind row content, revealed by swiping left */}
+      {/* Mobile delete button — sits behind row content, revealed by swiping left, flush against the right edge */}
       <button
         onClick={() => onDelete(song.id)}
         aria-label="Remove song"
+        title="Remove song"
         className="absolute right-0 top-0 bottom-0 w-16 md:hidden flex items-center justify-center bg-[var(--color-error)]/90 text-white"
       >
         <Trash size={18} />
@@ -190,14 +195,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
       {swipeX < 0 && (
         <div
           className="absolute inset-y-0 left-0 z-10"
-          style={{ right: DELETE_WIDTH }}
-          onClick={() => setSwipeX(0)}
-        />
-      )}
-      {swipeX > 0 && (
-        <div
-          className="absolute inset-y-0 right-0 z-10"
-          style={{ left: MARK_WIDTH }}
+          style={{ right: revealWidth }}
           onClick={() => setSwipeX(0)}
         />
       )}
