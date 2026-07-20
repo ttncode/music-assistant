@@ -78,3 +78,23 @@ async def clear_history(
             song.device_downloads[device_id].downloaded_at = None
     write_songs(data, settings.data_dir)
     return {"ok": True}
+
+
+@router.delete("/{device_id}")
+async def unregister_device(
+    device_id: str,
+    caller_id: str = Depends(get_device_id),
+    settings: Settings = Depends(get_settings),
+):
+    if caller_id != device_id:
+        raise HTTPException(status_code=403, detail="Cannot unregister another device")
+    data = read_songs(settings.data_dir)
+    device = next((d for d in data.devices if d.id == device_id), None)
+    device_in_downloads = any(device_id in song.device_downloads for song in data.songs)
+    if not device and not device_in_downloads:
+        raise HTTPException(status_code=404, detail="Device not found")
+    data.devices = [d for d in data.devices if d.id != device_id]
+    for song in data.songs:
+        song.device_downloads.pop(device_id, None)
+    write_songs(data, settings.data_dir)
+    return {"ok": True}

@@ -112,3 +112,39 @@ def test_dedup_devices_removes_duplicates(client, data_dir):
     data = read_songs(data_dir)
     iphone_devices = [d for d in data.devices if d.name.strip().lower() == "ttn iphone"]
     assert len(iphone_devices) == 1
+
+
+def test_unregister_device(client, data_dir):
+    reg = client.post("/api/devices/register", json={"name": "To Remove"})
+    dev_id = reg.json()["id"]
+    res = client.delete(f"/api/devices/{dev_id}", headers={"X-Device-ID": dev_id})
+    assert res.status_code == 200
+    from store import read_songs
+    data = read_songs(data_dir)
+    assert all(d.id != dev_id for d in data.devices)
+
+
+def test_unregister_device_forbidden(client):
+    reg = client.post("/api/devices/register", json={"name": "Device A"})
+    dev_id = reg.json()["id"]
+    res = client.delete(f"/api/devices/{dev_id}", headers={"X-Device-ID": "some-other-device"})
+    assert res.status_code == 403
+
+
+def test_unregister_device_not_found(client):
+    res = client.delete("/api/devices/nonexistent-id", headers={"X-Device-ID": "nonexistent-id"})
+    assert res.status_code == 404
+
+
+def test_unregister_device_removes_its_device_downloads_entries(client, data_dir):
+    from store import read_songs, write_songs
+    from models import SongsFile, Song, DeviceDownload
+    dev_id = "dev-to-remove"
+    song = Song(title="T", url="https://youtube.com/watch?v=x", platform="youtube",
+                device_downloads={dev_id: DeviceDownload(name="Old Phone", downloaded=True, ignored=True)})
+    write_songs(SongsFile(songs=[song], playlists=[], devices=[]), data_dir)
+
+    res = client.delete(f"/api/devices/{dev_id}", headers={"X-Device-ID": dev_id})
+    assert res.status_code == 200
+    data = read_songs(data_dir)
+    assert dev_id not in data.songs[0].device_downloads
