@@ -37,6 +37,8 @@ async def get_songs(
     songs_out = []
     for s in data.songs:
         dd = s.device_downloads.get(device_id)
+        if dd and dd.ignored:
+            continue
         songs_out.append({
             **s.model_dump(),
             "downloaded": dd.downloaded if dd else False,
@@ -73,13 +75,19 @@ async def add_song(
 
 
 @router.delete("/{song_id}")
-async def delete_song(
+async def hide_song(
     song_id: str,
-    _: str = Depends(get_device_id),
+    device_id: str = Depends(get_device_id),
     settings: Settings = Depends(get_settings),
 ):
     data = read_songs(settings.data_dir)
-    data.songs = [s for s in data.songs if s.id != song_id]
+    song = next((s for s in data.songs if s.id == song_id), None)
+    if not song:
+        raise HTTPException(status_code=404, detail="Song not found")
+    if device_id not in song.device_downloads:
+        device = next((d for d in data.devices if d.id == device_id), None)
+        song.device_downloads[device_id] = DeviceDownload(name=device.name if device else "Unknown")
+    song.device_downloads[device_id].ignored = True
     write_songs(data, settings.data_dir)
     return {"ok": True}
 

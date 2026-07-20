@@ -13,6 +13,7 @@ class DeviceDownload(BaseModel):
     name: str
     downloaded: bool = False
     downloaded_at: datetime | None = None
+    ignored: bool = False
 
 
 class Song(BaseModel):

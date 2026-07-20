@@ -44,6 +44,24 @@ def test_get_songs_false_for_unknown_device(client, data_dir):
     assert res.json()["songs"][0]["downloaded"] is False
 
 
+def test_get_songs_excludes_hidden_song_for_that_device(client, data_dir):
+    song = Song(title="T", url="https://youtube.com/watch?v=hide", platform="youtube",
+                device_downloads={DEV: DeviceDownload(name="Dev", ignored=True)})
+    seed(data_dir, [song])
+    res = client.get("/api/songs", headers=HEADERS)
+    assert res.json()["songs"] == []
+
+
+def test_get_songs_still_shows_hidden_song_to_other_device(client, data_dir):
+    song = Song(title="T", url="https://youtube.com/watch?v=hide2", platform="youtube",
+                device_downloads={DEV: DeviceDownload(name="Dev", ignored=True)})
+    seed(data_dir, [song])
+    res = client.get("/api/songs", headers={"X-Device-ID": "other-device"})
+    body = res.json()["songs"]
+    assert len(body) == 1
+    assert body[0]["downloaded"] is False
+
+
 def test_post_song_adds_to_list(client):
     res = client.post("/api/songs",
                       json={"url": "https://soundcloud.com/artist/track"},
@@ -60,19 +78,20 @@ def test_post_song_duplicate_returns_409(client, data_dir):
     assert res.status_code == 409
 
 
-def test_delete_song(client, data_dir):
+def test_delete_song_hides_for_calling_device_only(client, data_dir):
     song = Song(title="T", url="https://youtube.com/watch?v=del", platform="youtube")
     seed(data_dir, [song])
     res = client.delete(f"/api/songs/{song.id}", headers=HEADERS)
     assert res.status_code == 200
     from store import read_songs
-    assert len(read_songs(data_dir).songs) == 0
+    data = read_songs(data_dir)
+    assert len(data.songs) == 1
+    assert data.songs[0].device_downloads[DEV].ignored is True
 
 
-def test_delete_song_not_found_returns_ok(client):
+def test_delete_song_not_found_returns_404(client):
     res = client.delete("/api/songs/nonexistent-id", headers=HEADERS)
-    assert res.status_code == 200
-    assert res.json() == {"ok": True}
+    assert res.status_code == 404
 
 
 def test_get_songs_always_includes_tiktok_playlist(client):
