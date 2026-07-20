@@ -57,6 +57,7 @@ export const api = {
     register: (name: string) => req<{ id: string; name: string }>('POST', '/api/devices/register', { name }),
     rename: (deviceId: string, name: string) => req<{ id: string; name: string }>('PATCH', `/api/devices/${deviceId}`, { name }),
     clearHistory: (deviceId: string) => req<{ ok: boolean }>('DELETE', `/api/devices/${deviceId}/history`),
+    unregister: (deviceId: string) => req<{ ok: boolean }>('DELETE', `/api/devices/${deviceId}`),
   },
   songs: {
     list: () => req<SongsListResponse>('GET', '/api/songs'),

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Trash, SignOut, CircleNotch, PencilSimple } from '@phosphor-icons/react'
+import { X, Trash, SignOut, UserSwitch, CircleNotch, PencilSimple } from '@phosphor-icons/react'
 import { useDevice } from '../hooks/useDevice'
 import { api } from '../lib/api'
 
@@ -18,6 +18,8 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
   const [confirmText, setConfirmText] = useState('')
   const [clearing, setClearing] = useState(false)
   const [confirmUnregister, setConfirmUnregister] = useState('')
+  const [unregistering, setUnregistering] = useState(false)
+  const [unregisterError, setUnregisterError] = useState('')
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState('')
   const [renaming, setRenaming] = useState(false)
@@ -26,6 +28,7 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
     if (!open) {
       setConfirmText('')
       setConfirmUnregister('')
+      setUnregisterError('')
       setEditingName(false)
       setDraftName('')
     }
@@ -55,8 +58,22 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
     }
   }
 
-  function handleUnregister() {
-    if (confirmUnregister !== UNREGISTER_PHRASE) return
+  async function handleUnregister() {
+    if (!deviceId || confirmUnregister !== UNREGISTER_PHRASE) return
+    setUnregistering(true)
+    setUnregisterError('')
+    try {
+      await api.devices.unregister(deviceId)
+      clear()
+      onUnregistered()
+    } catch (e) {
+      setUnregisterError(e instanceof Error ? e.message : 'Failed to unregister device')
+    } finally {
+      setUnregistering(false)
+    }
+  }
+
+  function handleLogout() {
     clear()
     onUnregistered()
   }
@@ -118,6 +135,16 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
               </div>
             )}
             <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-mono">{deviceId}</p>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 cursor-pointer rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors w-full mt-3"
+            >
+              <UserSwitch size={14} />
+              Log out
+            </button>
+            <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+              Switch to a different device. This device stays registered — log back in with the same name to pick up where you left off.
+            </p>
           </section>
 
           <section>
@@ -145,22 +172,26 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
           <section>
             <h3 className="text-[11px] uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Account</h3>
             <p className="text-[11px] text-[var(--color-text-muted)] mb-2">
-              This will remove this device. You'll need to re-enter your access code to use it again.
+              This will permanently remove this device and delete its download history from the library. You'll need to re-enter your access code to use it again.
             </p>
             <input
               value={confirmUnregister}
               onChange={e => setConfirmUnregister(e.target.value)}
+              disabled={unregistering}
               placeholder={`Type "${UNREGISTER_PHRASE}" to confirm`}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-error)]/60 transition-colors placeholder:text-[var(--color-text-muted)] mb-2"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-error)]/60 transition-colors placeholder:text-[var(--color-text-muted)] mb-2 disabled:opacity-50"
             />
             <button
               onClick={handleUnregister}
-              disabled={confirmUnregister !== UNREGISTER_PHRASE}
+              disabled={unregistering || confirmUnregister !== UNREGISTER_PHRASE}
               className="flex items-center gap-2 cursor-pointer rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors w-full disabled:opacity-40"
             >
-              <SignOut size={14} />
-              Unregister this device
+              {unregistering ? <CircleNotch size={14} className="animate-spin" /> : <SignOut size={14} />}
+              {unregistering ? 'Unregistering...' : 'Unregister this device'}
             </button>
+            {unregisterError && (
+              <p className="text-[11px] text-[var(--color-error)] mt-1.5">{unregisterError}</p>
+            )}
           </section>
         </div>
       </div>
