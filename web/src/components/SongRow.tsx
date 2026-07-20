@@ -288,8 +288,9 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
           {!isDownloaded && (
             <button
               onClick={handleMarkDownloaded}
-              className="opacity-0 group-hover:opacity-100 cursor-pointer p-1 rounded text-[var(--color-text-muted)] hover:text-green-500 transition-all hidden md:flex"
+              className="opacity-0 group-hover:opacity-100 cursor-pointer p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-all hidden md:flex"
               aria-label="Mark as downloaded"
+              title="Mark as downloaded"
             >
               <CheckCircle size={13} />
             </button>
@@ -300,6 +301,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
             onClick={() => onDelete(song.id)}
             className="opacity-0 group-hover:opacity-100 cursor-pointer p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-error)] transition-all hidden md:flex"
             aria-label="Remove song"
+            title="Remove song"
           >
             <X size={13} />
           </button>
