@@ -138,11 +138,12 @@ def test_unregister_device_not_found(client):
 
 def test_unregister_device_removes_its_device_downloads_entries(client, data_dir):
     from store import read_songs, write_songs
-    from models import SongsFile, Song, DeviceDownload
+    from models import SongsFile, Song, DeviceDownload, Device
     dev_id = "dev-to-remove"
     song = Song(title="T", url="https://youtube.com/watch?v=x", platform="youtube",
                 device_downloads={dev_id: DeviceDownload(name="Old Phone", downloaded=True, ignored=True)})
-    write_songs(SongsFile(songs=[song], playlists=[], devices=[]), data_dir)
+    device = Device(id=dev_id, name="Old Phone")
+    write_songs(SongsFile(songs=[song], playlists=[], devices=[device]), data_dir)
 
     res = client.delete(f"/api/devices/{dev_id}", headers={"X-Device-ID": dev_id})
     assert res.status_code == 200

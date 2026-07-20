@@ -90,8 +90,7 @@ async def unregister_device(
         raise HTTPException(status_code=403, detail="Cannot unregister another device")
     data = read_songs(settings.data_dir)
     device = next((d for d in data.devices if d.id == device_id), None)
-    device_in_downloads = any(device_id in song.device_downloads for song in data.songs)
-    if not device and not device_in_downloads:
+    if not device:
         raise HTTPException(status_code=404, detail="Device not found")
     data.devices = [d for d in data.devices if d.id != device_id]
     for song in data.songs:
