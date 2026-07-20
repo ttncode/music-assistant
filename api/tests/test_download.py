@@ -24,6 +24,41 @@ def test_get_file_path_returns_path_when_sidecar_exists(tmp_path):
     assert get_file_path(url, playlist, str(tmp_path)) == mp3
 
 
+def test_get_file_path_relocates_file_from_different_playlist_folder(tmp_path):
+    from services.downloader import get_file_path, _url_hash, _sanitize
+    url = "https://youtube.com/watch?v=moved"
+    old_folder = tmp_path / _sanitize("OldPlaylist")
+    old_folder.mkdir()
+    mp3 = old_folder / "Moved Song.mp3"
+    mp3.write_text("fake")
+    old_sidecar = old_folder / f".{_url_hash(url)}.done"
+    old_sidecar.write_text(str(mp3))
+
+    result = get_file_path(url, "NewPlaylist", str(tmp_path))
+
+    new_folder = tmp_path / _sanitize("NewPlaylist")
+    new_mp3 = new_folder / "Moved Song.mp3"
+    assert result == str(new_mp3)
+    assert new_mp3.exists()
+    assert not mp3.exists()
+    assert not old_sidecar.exists()
+    assert (new_folder / f".{_url_hash(url)}.done").exists()
+
+
+def test_get_file_path_cleans_up_stale_sidecar_in_other_folder(tmp_path):
+    from services.downloader import get_file_path, _url_hash, _sanitize
+    url = "https://youtube.com/watch?v=gone"
+    old_folder = tmp_path / _sanitize("OldPlaylist")
+    old_folder.mkdir()
+    old_sidecar = old_folder / f".{_url_hash(url)}.done"
+    old_sidecar.write_text(str(old_folder / "Deleted Song.mp3"))  # mp3 never actually created
+
+    result = get_file_path(url, "NewPlaylist", str(tmp_path))
+
+    assert result is None
+    assert not old_sidecar.exists()
+
+
 def test_download_song_calls_yt_dlp(tmp_path):
     from services.downloader import download_song
     mock_info = {"title": "Test Song"}

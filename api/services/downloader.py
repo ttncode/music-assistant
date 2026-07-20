@@ -22,16 +22,44 @@ def _url_hash(url: str) -> str:
 
 
 def get_file_path(url: str, playlist: str, music_dir: str) -> str | None:
-    """Return path to existing MP3 for this URL if already downloaded, else None."""
-    safe_playlist = _sanitize(playlist)
-    folder = Path(music_dir) / safe_playlist
-    if not folder.exists():
-        return None
+    """Return path to existing MP3 for this URL if already downloaded, else None.
+
+    Self-heals across playlist moves: if the song was downloaded while it
+    belonged to a different playlist, the file is found under that old
+    playlist's folder and relocated into the current one here, so the song
+    is never redownloaded just because its playlist changed.
+    """
     # yt-dlp names files as %(title)s.mp3 — we can't know the exact name without extracting info
     # So we embed the song ID in a sidecar file instead (see download_song)
-    sidecar = folder / f".{_url_hash(url)}.done"
+    hash_name = f".{_url_hash(url)}.done"
+    safe_playlist = _sanitize(playlist)
+    folder = Path(music_dir) / safe_playlist
+
+    sidecar = folder / hash_name
     if sidecar.exists():
         return sidecar.read_text().strip()
+
+    root = Path(music_dir)
+    if not root.exists():
+        return None
+
+    for other in root.iterdir():
+        if not other.is_dir() or other == folder:
+            continue
+        other_sidecar = other / hash_name
+        if not other_sidecar.exists():
+            continue
+        old_mp3 = Path(other_sidecar.read_text().strip())
+        if not old_mp3.exists():
+            other_sidecar.unlink(missing_ok=True)
+            continue
+        folder.mkdir(parents=True, exist_ok=True)
+        new_mp3 = folder / old_mp3.name
+        old_mp3.rename(new_mp3)
+        other_sidecar.unlink()
+        sidecar.write_text(str(new_mp3))
+        return str(new_mp3)
+
     return None
 
 
