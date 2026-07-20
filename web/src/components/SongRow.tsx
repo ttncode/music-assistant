@@ -61,6 +61,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
   const touchStart = useRef<{ x: number; y: number; baseSwipeX: number } | null>(null)
   const swipeDragging = useRef(false)
   const rowRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setLocalDownloaded(false)
@@ -78,7 +79,7 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
   // during a confirmed horizontal swipe. JSX onTouchMove is passive and cannot
   // call preventDefault().
   useEffect(() => {
-    const el = rowRef.current
+    const el = containerRef.current
     if (!el) return
     function onTouchMove(e: TouchEvent) {
       if (!touchStart.current) return
@@ -166,7 +167,12 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
   }
 
   return (
-    <div className="relative overflow-hidden border-b border-[var(--color-border)]">
+    <div
+      ref={containerRef}
+      className="relative overflow-hidden border-b border-[var(--color-border)]"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Mobile mark-as-downloaded button — revealed by swiping left, sits left of the remove button */}
       {!isDownloaded && (
         <button
@@ -210,8 +216,6 @@ export function SongRow({ song, onDelete, onDownloaded, onError, isSelectMode, s
             ? 'transform 150ms ease-out, background-color 150ms'
             : 'background-color 150ms',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
         {/* Checkbox */}
         <button
