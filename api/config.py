@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     music_dir: str = "/music"
     data_dir: str = "/data"
     auto_prepare: bool = True
+    max_concurrent_downloads: int = 3
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 
