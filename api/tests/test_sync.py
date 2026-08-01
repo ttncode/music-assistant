@@ -111,3 +111,43 @@ async def test_startup_sync_skips_when_songs_file_exists(data_dir):
         import main
         await main._maybe_auto_sync(settings)
         mock_create_task.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_run_sync_fetches_youtube_and_soundcloud_concurrently(data_dir, tmp_path):
+    import time
+    from config import Settings
+    from routers.sync import _run_sync
+    from store import read_songs
+
+    settings = Settings(
+        access_code="secret",
+        data_dir=data_dir,
+        music_dir=str(tmp_path / "music"),
+        youtube_api_key="key",
+        youtube_channel_id="chan",
+        soundcloud_profile_url="https://soundcloud.com/someone",
+        auto_prepare=False,
+    )
+
+    async def fake_youtube(*args, **kwargs):
+        await asyncio.sleep(0.1)
+        return [{"title": "YT Playlist", "platform": "youtube",
+                  "songs": [{"title": "YT Song", "url": "https://youtube.com/watch?v=yt1", "thumbnail": ""}]}]
+
+    def fake_soundcloud(*args, **kwargs):
+        time.sleep(0.1)
+        return [{"title": "SC Playlist", "platform": "soundcloud",
+                  "songs": [{"title": "SC Song", "url": "https://soundcloud.com/track1", "thumbnail": ""}]}]
+
+    with patch("routers.sync.fetch_youtube_playlists", side_effect=fake_youtube), \
+         patch("routers.sync.fetch_soundcloud_playlists", side_effect=fake_soundcloud):
+        start = time.monotonic()
+        await _run_sync(settings)
+        elapsed = time.monotonic() - start
+
+    assert elapsed < 0.18  # sequential (0.1s + 0.1s) would take >= 0.2s; concurrent takes ~0.1s
+    data = read_songs(data_dir)
+    urls = {s.url for s in data.songs}
+    assert "https://youtube.com/watch?v=yt1" in urls
+    assert "https://soundcloud.com/track1" in urls

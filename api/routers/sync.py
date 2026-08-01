@@ -68,17 +68,22 @@ async def _run_sync(settings: Settings):
     _status = {"running": True, "added": 0, "total": 0, "error": None}
     try:
         all_playlists: list[dict] = []
-
         sync_platforms: set[str] = set()
-        if settings.youtube_api_key and settings.youtube_channel_id:
-            yt = await fetch_youtube_playlists(settings.youtube_api_key, settings.youtube_channel_id)
-            all_playlists.extend(yt)
-            sync_platforms.add("youtube")
 
+        fetch_tasks = []
+        fetch_platforms = []
+        if settings.youtube_api_key and settings.youtube_channel_id:
+            fetch_tasks.append(fetch_youtube_playlists(settings.youtube_api_key, settings.youtube_channel_id))
+            fetch_platforms.append("youtube")
         if settings.soundcloud_profile_url:
-            sc = await asyncio.to_thread(fetch_soundcloud_playlists, settings.soundcloud_profile_url)
-            all_playlists.extend(sc)
-            sync_platforms.add("soundcloud")
+            fetch_tasks.append(asyncio.to_thread(fetch_soundcloud_playlists, settings.soundcloud_profile_url))
+            fetch_platforms.append("soundcloud")
+
+        if fetch_tasks:
+            results = await asyncio.gather(*fetch_tasks)
+            for platform, playlists in zip(fetch_platforms, results):
+                all_playlists.extend(playlists)
+                sync_platforms.add(platform)
 
         # Build source truth indexed by URL (first occurrence wins for duplicates)
         source_by_url: dict[str, dict] = {}
@@ -106,7 +111,7 @@ async def _run_sync(settings: Settings):
                     }
                     song_order[url] = i
 
-        data = read_songs(settings.data_dir)
+        data = await asyncio.to_thread(read_songs, settings.data_dir)
 
         # A song is sync-managed if it comes from a configured platform and was not manually added
         def is_sync_managed(s: Song) -> bool:
@@ -157,7 +162,7 @@ async def _run_sync(settings: Settings):
         data.playlists = list(playlist_order.keys()) + manual_only_playlists
         data.playlist_sources = playlist_sources
 
-        write_songs(data, settings.data_dir)
+        await asyncio.to_thread(write_songs, data, settings.data_dir)
         _status = {"running": False, "added": added, "total": len(data.songs), "error": None}
 
         if settings.auto_prepare:
