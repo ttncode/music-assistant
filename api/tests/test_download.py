@@ -124,6 +124,18 @@ def test_get_file_path_cleans_up_stale_sidecar_with_and_without_index(tmp_path, 
     assert not old_sidecar.exists()
 
 
+def test_get_file_path_with_stale_index_entry_returns_none_instead_of_raising(tmp_path):
+    from services.downloader import get_file_path, _url_hash, _sanitize
+    url = "https://youtube.com/watch?v=staleindex"
+    sidecar_path = tmp_path / _sanitize("OldPlaylist") / f".{_url_hash(url)}.done"
+    # index points at a sidecar file that was never actually created on disk
+    stale_index = {_url_hash(url): sidecar_path}
+
+    result = get_file_path(url, "NewPlaylist", str(tmp_path), stale_index)
+
+    assert result is None
+
+
 def test_download_song_calls_yt_dlp(tmp_path):
     from services.downloader import download_song
     mock_info = {"title": "Test Song"}

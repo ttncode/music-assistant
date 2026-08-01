@@ -39,8 +39,11 @@ def build_sidecar_index(music_dir: str) -> dict[str, Path]:
 def _relocate(other_sidecar: Path, sidecar: Path, folder: Path) -> str | None:
     """Move the MP3 recorded by other_sidecar into folder, rewrite the sidecar there.
 
-    Returns the new path, or None (and deletes other_sidecar) if the recorded MP3 no longer exists.
+    Returns the new path, or None if other_sidecar doesn't exist, or (deleting
+    it) if the recorded MP3 no longer exists.
     """
+    if not other_sidecar.exists():
+        return None
     old_mp3 = Path(other_sidecar.read_text().strip())
     if not old_mp3.exists():
         other_sidecar.unlink(missing_ok=True)
