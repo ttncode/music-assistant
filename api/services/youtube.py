@@ -1,5 +1,8 @@
 import asyncio
+import logging
 import httpx
+
+logger = logging.getLogger(__name__)
 
 _BASE = "https://www.googleapis.com/youtube/v3"
 
@@ -26,9 +29,13 @@ async def _get_playlists(client: httpx.AsyncClient, api_key: str, channel_id: st
         r.raise_for_status()
         data = r.json()
         items.extend(data.get("items", []))
-        page_token = data.get("nextPageToken")
-        if not page_token:
+        next_token = data.get("nextPageToken")
+        if not next_token:
             break
+        if next_token == page_token:
+            logger.warning(f"YouTube API returned a non-advancing pageToken for channel {channel_id} — stopping pagination early")
+            break
+        page_token = next_token
     return items
 
 
@@ -52,7 +59,11 @@ async def _get_playlist_items(client: httpx.AsyncClient, api_key: str, playlist_
                 "url": f"https://www.youtube.com/watch?v={vid_id}",
                 "thumbnail": thumb,
             })
-        page_token = data.get("nextPageToken")
-        if not page_token:
+        next_token = data.get("nextPageToken")
+        if not next_token:
             break
+        if next_token == page_token:
+            logger.warning(f"YouTube API returned a non-advancing pageToken for playlist {playlist_id} — stopping pagination early")
+            break
+        page_token = next_token
     return songs

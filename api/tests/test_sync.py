@@ -42,6 +42,80 @@ async def test_fetch_youtube_playlists_returns_structured_data():
 
 
 @pytest.mark.asyncio
+async def test_fetch_youtube_playlists_stops_when_page_token_does_not_advance():
+    """Regression test: a real YouTube playlist returned the same nextPageToken
+    forever, causing an infinite request loop that never terminated."""
+    playlists_response = {"items": [{"id": "PLabc", "snippet": {"title": "Chill"}}]}
+    call_count = {"n": 0}
+
+    async def mock_get(self_or_url, url_or_none=None, **kwargs):
+        url = url_or_none if url_or_none is not None else self_or_url
+
+        if "playlistItems" in url:
+            call_count["n"] += 1
+            if call_count["n"] > 5:
+                raise AssertionError("pagination loop did not terminate")
+
+            class R:
+                def raise_for_status(self): pass
+                def json(self):
+                    return {
+                        "items": [{
+                            "snippet": {"title": "Song One", "resourceId": {"videoId": "vid1"}, "thumbnails": {}},
+                        }],
+                        "nextPageToken": "STUCK_TOKEN",
+                    }
+            return R()
+
+        class R:
+            def raise_for_status(self): pass
+            def json(self):
+                return playlists_response
+        return R()
+
+    with patch("httpx.AsyncClient.get", new=mock_get):
+        from services.youtube import fetch_youtube_playlists
+        result = await fetch_youtube_playlists("key123", "UCchannel")
+
+    # Terminates after 2 requests (proves the loop stops) instead of hanging forever.
+    # The stuck page's items get fetched once before the repeat is detected, so the
+    # result includes that page's item twice — harmless, sync dedupes songs by URL.
+    assert call_count["n"] == 2
+    assert len(result[0]["songs"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_get_playlists_stops_when_page_token_does_not_advance():
+    """Same non-advancing-pageToken protection, for the playlist-list pagination."""
+    call_count = {"n": 0}
+
+    async def mock_get(self_or_url, url_or_none=None, **kwargs):
+        call_count["n"] += 1
+        if call_count["n"] > 5:
+            raise AssertionError("pagination loop did not terminate")
+
+        class R:
+            def raise_for_status(self): pass
+            def json(self):
+                return {
+                    "items": [{"id": "PLabc", "snippet": {"title": "Chill"}}],
+                    "nextPageToken": "STUCK_TOKEN",
+                }
+        return R()
+
+    with patch("httpx.AsyncClient.get", new=mock_get):
+        import httpx
+        from services.youtube import _get_playlists
+        async with httpx.AsyncClient() as client:
+            result = await _get_playlists(client, "key123", "UCchannel")
+
+    # Terminates after 2 requests (proves the loop stops); the stuck page's playlist
+    # gets fetched once before the repeat is detected, so it appears twice — harmless.
+    assert call_count["n"] == 2
+    assert len(result) == 2
+
+
+@pytest.mark.asyncio
 async def test_fetch_youtube_playlists_fetches_playlist_items_concurrently():
     playlists_response = {
         "items": [
