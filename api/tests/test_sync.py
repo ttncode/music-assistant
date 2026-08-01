@@ -151,3 +151,76 @@ async def test_run_sync_fetches_youtube_and_soundcloud_concurrently(data_dir, tm
     urls = {s.url for s in data.songs}
     assert "https://youtube.com/watch?v=yt1" in urls
     assert "https://soundcloud.com/track1" in urls
+
+
+@pytest.mark.asyncio
+async def test_auto_prepare_all_downloads_missing_songs_within_concurrency_limit(data_dir, tmp_path, monkeypatch):
+    import threading
+    import time
+    from config import Settings
+    from routers.sync import _auto_prepare_all
+    from models import Song, SongsFile
+    from store import write_songs
+
+    music_dir = tmp_path / "music"
+    settings = Settings(access_code="secret", data_dir=data_dir, music_dir=str(music_dir),
+                         max_concurrent_downloads=3, auto_prepare=False)
+
+    songs = [Song(title=f"Song {i}", url=f"https://youtube.com/watch?v=song{i}",
+                  platform="youtube", playlist="Pop") for i in range(6)]
+    write_songs(SongsFile(songs=songs, playlists=["Pop"], devices=[]), data_dir)
+
+    lock = threading.Lock()
+    state = {"current": 0, "max": 0}
+
+    def fake_download_song(url, playlist, music_dir_arg):
+        with lock:
+            state["current"] += 1
+            state["max"] = max(state["max"], state["current"])
+        time.sleep(0.05)
+        folder = Path(music_dir_arg) / playlist
+        folder.mkdir(parents=True, exist_ok=True)
+        mp3 = folder / f"{url[-1]}.mp3"
+        mp3.write_bytes(b"fake")
+        with lock:
+            state["current"] -= 1
+        return str(mp3)
+
+    monkeypatch.setattr("routers.sync.download_song", fake_download_song)
+
+    await _auto_prepare_all(settings)
+
+    assert state["max"] == 3
+
+
+@pytest.mark.asyncio
+async def test_auto_prepare_all_continues_after_one_download_failure(data_dir, tmp_path):
+    from config import Settings
+    from routers.sync import _auto_prepare_all
+    from models import Song, SongsFile
+    from store import write_songs, read_songs
+
+    music_dir = tmp_path / "music"
+    settings = Settings(access_code="secret", data_dir=data_dir, music_dir=str(music_dir), auto_prepare=False)
+
+    good = Song(title="Good", url="https://youtube.com/watch?v=good", platform="youtube", playlist="Pop")
+    bad = Song(title="Bad", url="https://youtube.com/watch?v=bad", platform="youtube", playlist="Pop")
+    write_songs(SongsFile(songs=[good, bad], playlists=["Pop"], devices=[]), data_dir)
+
+    def fake_download_song(url, playlist, music_dir_arg):
+        if "bad" in url:
+            raise Exception("boom")
+        folder = Path(music_dir_arg) / playlist
+        folder.mkdir(parents=True, exist_ok=True)
+        mp3 = folder / "good.mp3"
+        mp3.write_bytes(b"fake")
+        return str(mp3)
+
+    with patch("routers.sync.download_song", side_effect=fake_download_song):
+        await _auto_prepare_all(settings)
+
+    data = read_songs(data_dir)
+    good_updated = next(s for s in data.songs if s.id == good.id)
+    bad_updated = next(s for s in data.songs if s.id == bad.id)
+    assert good_updated.prepared is True
+    assert bad_updated.prepared is False

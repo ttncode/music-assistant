@@ -8,7 +8,7 @@ from routers.auth import get_device_id
 from routers.songs import detect_platform
 from services.youtube import fetch_youtube_playlists
 from services.soundcloud import fetch_soundcloud_playlists
-from services.downloader import download_song, get_file_path, _get_lock, remove_song_files
+from services.downloader import download_song, get_file_path, _get_lock, remove_song_files, build_sidecar_index
 
 logger = logging.getLogger(__name__)
 
@@ -35,31 +35,45 @@ async def sync_status(_: str = Depends(get_device_id)):
 
 
 async def _auto_prepare_all(settings: Settings) -> None:
-    data = read_songs(settings.data_dir)
+    data = await asyncio.to_thread(read_songs, settings.data_dir)
     to_mark: set[str] = set()
     logger.info("👉 Auto prepare all undownloaded songs")
+
+    index = build_sidecar_index(settings.music_dir)
+    missing: list[Song] = []
     for song in data.songs:
-        if get_file_path(song.url, song.playlist, settings.music_dir):
+        if get_file_path(song.url, song.playlist, settings.music_dir, index):
             if not song.prepared:
                 to_mark.add(song.id)
         else:
-            async with _get_lock(song.id):
-                if not get_file_path(song.url, song.playlist, settings.music_dir):
-                    logger.info(f"👉 Downloading - {song.title}")
-                    try:
-                        await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
-                        to_mark.add(song.id)
-                    except Exception as e:
-                        logger.error(f"❌ Failed - {song.title}: {e}")
+            missing.append(song)
+
+    sem = asyncio.Semaphore(settings.max_concurrent_downloads)
+
+    async def _download_one(song: Song) -> None:
+        async with sem, _get_lock(song.id):
+            if get_file_path(song.url, song.playlist, settings.music_dir, index):
+                to_mark.add(song.id)
+                return
+            logger.info(f"👉 Downloading - {song.title}")
+            try:
+                await asyncio.to_thread(download_song, song.url, song.playlist, settings.music_dir)
+                to_mark.add(song.id)
+            except Exception as e:
+                logger.error(f"❌ Failed - {song.title}: {e}")
+
+    if missing:
+        await asyncio.gather(*(_download_one(song) for song in missing))
+
     if to_mark:
-        fresh = read_songs(settings.data_dir)
+        fresh = await asyncio.to_thread(read_songs, settings.data_dir)
         changed = False
         for song in fresh.songs:
             if song.id in to_mark and not song.prepared:
                 song.prepared = True
                 changed = True
         if changed:
-            write_songs(fresh, settings.data_dir)
+            await asyncio.to_thread(write_songs, fresh, settings.data_dir)
     logger.info("✅ Prepared all songs")
 
 
