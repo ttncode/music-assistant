@@ -25,12 +25,13 @@ def _apply_log_format_to_uvicorn() -> None:
             handler.setFormatter(formatter)
 
 
-async def _maybe_auto_sync(settings: Settings) -> None:
+async def _maybe_auto_sync(settings: Settings) -> bool:
     if (Path(settings.data_dir) / "songs.json").exists():
-        return
+        return False
     from routers.sync import _status
     _status["running"] = True
     asyncio.create_task(_run_sync(settings))
+    return True
 
 
 @asynccontextmanager
@@ -48,8 +49,8 @@ async def lifespan(app: FastAPI):
     logger.info(f"⚙️  _SoundCloud: {'configured' if settings.soundcloud_profile_url else 'not configured'}")
     logger.info("✅ Configuration loaded")
 
-    await _maybe_auto_sync(settings)
-    if settings.auto_prepare:
+    did_sync = await _maybe_auto_sync(settings)
+    if settings.auto_prepare and not did_sync:
         asyncio.create_task(_auto_prepare_all(settings))
 
     logger.info(f"🚀 Booted successfully - {settings.app_name} v{settings.app_version}")

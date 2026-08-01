@@ -95,8 +95,9 @@ async def test_startup_sync_triggers_when_no_songs_file(data_dir):
     with patch("main.asyncio.create_task") as mock_create_task:
         mock_create_task.return_value = None
         import main
-        await main._maybe_auto_sync(settings)
+        did_sync = await main._maybe_auto_sync(settings)
         mock_create_task.assert_called_once()
+        assert did_sync is True
 
 
 @pytest.mark.asyncio
@@ -109,8 +110,48 @@ async def test_startup_sync_skips_when_songs_file_exists(data_dir):
 
     with patch("main.asyncio.create_task") as mock_create_task:
         import main
-        await main._maybe_auto_sync(settings)
+        did_sync = await main._maybe_auto_sync(settings)
         mock_create_task.assert_not_called()
+        assert did_sync is False
+
+
+@pytest.mark.asyncio
+async def test_lifespan_only_creates_one_task_on_cold_boot(monkeypatch, data_dir, tmp_path):
+    from config import get_settings
+    monkeypatch.setenv("ACCESS_CODE", "secret")
+    monkeypatch.setenv("DATA_DIR", data_dir)
+    monkeypatch.setenv("MUSIC_DIR", str(tmp_path / "music"))
+    monkeypatch.setenv("AUTO_PREPARE", "true")
+    get_settings.cache_clear()
+
+    with patch("main.asyncio.create_task") as mock_create_task:
+        mock_create_task.return_value = None
+        import main
+        async with main.lifespan(main.app):
+            pass
+
+    assert mock_create_task.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_lifespan_creates_auto_prepare_task_on_warm_restart(monkeypatch, data_dir, tmp_path):
+    from config import get_settings
+    (Path(data_dir) / "songs.json").write_text(
+        '{"songs": [], "playlists": [], "playlist_sources": {}}'
+    )
+    monkeypatch.setenv("ACCESS_CODE", "secret")
+    monkeypatch.setenv("DATA_DIR", data_dir)
+    monkeypatch.setenv("MUSIC_DIR", str(tmp_path / "music"))
+    monkeypatch.setenv("AUTO_PREPARE", "true")
+    get_settings.cache_clear()
+
+    with patch("main.asyncio.create_task") as mock_create_task:
+        mock_create_task.return_value = None
+        import main
+        async with main.lifespan(main.app):
+            pass
+
+    assert mock_create_task.call_count == 1
 
 
 @pytest.mark.asyncio
