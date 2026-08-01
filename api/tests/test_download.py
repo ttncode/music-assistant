@@ -59,6 +59,71 @@ def test_get_file_path_cleans_up_stale_sidecar_in_other_folder(tmp_path):
     assert not old_sidecar.exists()
 
 
+def test_build_sidecar_index_maps_hash_to_sidecar_across_playlists(tmp_path):
+    from services.downloader import build_sidecar_index, _url_hash, _sanitize
+    folder_a = tmp_path / _sanitize("Chill")
+    folder_a.mkdir()
+    url_a = "https://youtube.com/watch?v=aaa"
+    sidecar_a = folder_a / f".{_url_hash(url_a)}.done"
+    sidecar_a.write_text(str(folder_a / "Song A.mp3"))
+
+    folder_b = tmp_path / _sanitize("Workout")
+    folder_b.mkdir()
+    url_b = "https://youtube.com/watch?v=bbb"
+    sidecar_b = folder_b / f".{_url_hash(url_b)}.done"
+    sidecar_b.write_text(str(folder_b / "Song B.mp3"))
+
+    index = build_sidecar_index(str(tmp_path))
+
+    assert index[_url_hash(url_a)] == sidecar_a
+    assert index[_url_hash(url_b)] == sidecar_b
+
+
+def test_build_sidecar_index_empty_when_music_dir_missing(tmp_path):
+    from services.downloader import build_sidecar_index
+    missing = tmp_path / "does-not-exist"
+    assert build_sidecar_index(str(missing)) == {}
+
+
+@pytest.mark.parametrize("use_index", [False, True])
+def test_get_file_path_relocates_file_from_different_playlist_folder_with_and_without_index(tmp_path, use_index):
+    from services.downloader import get_file_path, build_sidecar_index, _url_hash, _sanitize
+    url = "https://youtube.com/watch?v=moved2"
+    old_folder = tmp_path / _sanitize("OldPlaylist")
+    old_folder.mkdir()
+    mp3 = old_folder / "Moved Song.mp3"
+    mp3.write_text("fake")
+    old_sidecar = old_folder / f".{_url_hash(url)}.done"
+    old_sidecar.write_text(str(mp3))
+
+    index = build_sidecar_index(str(tmp_path)) if use_index else None
+    result = get_file_path(url, "NewPlaylist", str(tmp_path), index)
+
+    new_folder = tmp_path / _sanitize("NewPlaylist")
+    new_mp3 = new_folder / "Moved Song.mp3"
+    assert result == str(new_mp3)
+    assert new_mp3.exists()
+    assert not mp3.exists()
+    assert not old_sidecar.exists()
+    assert (new_folder / f".{_url_hash(url)}.done").exists()
+
+
+@pytest.mark.parametrize("use_index", [False, True])
+def test_get_file_path_cleans_up_stale_sidecar_with_and_without_index(tmp_path, use_index):
+    from services.downloader import get_file_path, build_sidecar_index, _url_hash, _sanitize
+    url = "https://youtube.com/watch?v=gone2"
+    old_folder = tmp_path / _sanitize("OldPlaylist")
+    old_folder.mkdir()
+    old_sidecar = old_folder / f".{_url_hash(url)}.done"
+    old_sidecar.write_text(str(old_folder / "Deleted Song.mp3"))
+
+    index = build_sidecar_index(str(tmp_path)) if use_index else None
+    result = get_file_path(url, "NewPlaylist", str(tmp_path), index)
+
+    assert result is None
+    assert not old_sidecar.exists()
+
+
 def test_download_song_calls_yt_dlp(tmp_path):
     from services.downloader import download_song
     mock_info = {"title": "Test Song"}
