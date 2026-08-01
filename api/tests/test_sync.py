@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from pathlib import Path
 from unittest.mock import patch
@@ -38,6 +39,52 @@ async def test_fetch_youtube_playlists_returns_structured_data():
     assert result[0]["title"] == "Chill"
     assert result[0]["songs"][0]["title"] == "Song One"
     assert "youtube.com" in result[0]["songs"][0]["url"]
+
+
+@pytest.mark.asyncio
+async def test_fetch_youtube_playlists_fetches_playlist_items_concurrently():
+    playlists_response = {
+        "items": [
+            {"id": "PLabc", "snippet": {"title": "Chill"}},
+            {"id": "PLdef", "snippet": {"title": "Workout"}},
+        ]
+    }
+    items_by_playlist = {
+        "PLabc": {"items": [{
+            "snippet": {"title": "Song One", "resourceId": {"videoId": "vid1"}, "thumbnails": {}},
+        }]},
+        "PLdef": {"items": [{
+            "snippet": {"title": "Song Two", "resourceId": {"videoId": "vid2"}, "thumbnails": {}},
+        }]},
+    }
+    state = {"current": 0, "max": 0}
+
+    async def mock_get(self_or_url, url_or_none=None, **kwargs):
+        url = url_or_none if url_or_none is not None else self_or_url
+        params = kwargs.get("params", {})
+
+        class R:
+            def raise_for_status(self): pass
+            def json(self):
+                if "playlistItems" in url:
+                    return items_by_playlist[params["playlistId"]]
+                return playlists_response
+
+        if "playlistItems" in url:
+            state["current"] += 1
+            state["max"] = max(state["max"], state["current"])
+            await asyncio.sleep(0.05)
+            state["current"] -= 1
+        return R()
+
+    with patch("httpx.AsyncClient.get", new=mock_get):
+        from services.youtube import fetch_youtube_playlists
+        result = await fetch_youtube_playlists("key123", "UCchannel")
+
+    assert state["max"] == 2
+    songs_by_title = {pl["title"]: pl["songs"][0]["title"] for pl in result}
+    assert songs_by_title["Chill"] == "Song One"
+    assert songs_by_title["Workout"] == "Song Two"
 
 
 @pytest.mark.asyncio

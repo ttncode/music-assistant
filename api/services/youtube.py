@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 
 _BASE = "https://www.googleapis.com/youtube/v3"
@@ -6,11 +7,13 @@ _BASE = "https://www.googleapis.com/youtube/v3"
 async def fetch_youtube_playlists(api_key: str, channel_id: str) -> list[dict]:
     async with httpx.AsyncClient() as client:
         playlists = await _get_playlists(client, api_key, channel_id)
-        result = []
-        for pl in playlists:
-            songs = await _get_playlist_items(client, api_key, pl["id"])
-            result.append({"title": pl["snippet"]["title"], "playlist_id": pl["id"], "platform": "youtube", "songs": songs})
-        return result
+        songs_lists = await asyncio.gather(
+            *(_get_playlist_items(client, api_key, pl["id"]) for pl in playlists)
+        )
+        return [
+            {"title": pl["snippet"]["title"], "playlist_id": pl["id"], "platform": "youtube", "songs": songs}
+            for pl, songs in zip(playlists, songs_lists)
+        ]
 
 
 async def _get_playlists(client: httpx.AsyncClient, api_key: str, channel_id: str) -> list:
