@@ -58,7 +58,7 @@ async def verify(
     client_key = request.client.host if request.client else "unknown"
     _check_rate_limit(client_key)
     code = body.get("code", "")
-    if not hmac.compare_digest(code, settings.access_code):
+    if not isinstance(code, str) or not hmac.compare_digest(code.encode(), settings.access_code.encode()):
         raise HTTPException(status_code=401, detail="Invalid access code")
     _reset_rate_limit(client_key)
     return {"ok": True, "ticket": issue_ticket()}

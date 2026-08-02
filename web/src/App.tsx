@@ -103,7 +103,7 @@ export default function App() {
   const handleRegistered = useCallback(() => setAuthState('ready'), [])
 
   if (authState === 'needs_code') return <AuthScreen onVerified={handleVerified} />
-  if (authState === 'needs_name') return <DeviceNameScreen ticket={registrationTicket} onRegistered={handleRegistered} />
+  if (authState === 'needs_name') return <DeviceNameScreen ticket={registrationTicket} onRegistered={handleRegistered} onExpired={() => setAuthState('needs_code')} />
 
   return (
     <div className="min-h-[100dvh] flex flex-col max-w-2xl mx-auto">

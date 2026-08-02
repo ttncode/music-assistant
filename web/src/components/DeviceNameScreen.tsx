@@ -5,9 +5,10 @@ import { useDevice } from '../hooks/useDevice'
 interface Props {
   ticket: string
   onRegistered: () => void
+  onExpired: () => void
 }
 
-export function DeviceNameScreen({ ticket, onRegistered }: Props) {
+export function DeviceNameScreen({ ticket, onRegistered, onExpired }: Props) {
   const { register } = useDevice()
   const [name, setName] = useState('')
   const [error, setError] = useState('')
@@ -20,8 +21,9 @@ export function DeviceNameScreen({ ticket, onRegistered }: Props) {
     try {
       await register(name.trim(), ticket)
       onRegistered()
-    } catch {
-      setError('Failed to register device. Check your connection.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to register device. Check your connection.')
+      onExpired()
     } finally {
       setLoading(false)
     }

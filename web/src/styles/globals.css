@@ -43,3 +43,7 @@ body {
 dialog.settings-dialog::backdrop {
   background-color: rgb(0 0 0 / 0.6);
 }
+
+dialog.settings-dialog:not([open]) {
+  display: none;
+}

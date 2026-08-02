@@ -27,6 +27,16 @@ def test_verify_wrong_code(client):
     assert res.status_code == 401
 
 
+def test_verify_non_string_code_returns_401_not_500(client):
+    res = client.post("/api/auth/verify", json={"code": 12345})
+    assert res.status_code == 401
+
+
+def test_verify_non_ascii_code_does_not_crash(client):
+    res = client.post("/api/auth/verify", json={"code": "café"})
+    assert res.status_code == 401
+
+
 def test_protected_route_requires_device_id(client):
     from fastapi import Depends
     from routers.auth import get_device_id
