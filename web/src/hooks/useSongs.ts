@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { api, SongResponse } from '../lib/api'
 
 export function useSongs(enabled = true) {
@@ -22,11 +22,40 @@ export function useSongs(enabled = true) {
     }
   }, [])
 
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   useEffect(() => {
     if (!enabled) return
+
+    function startPolling() {
+      if (intervalRef.current) return
+      intervalRef.current = setInterval(fetch, 10_000)
+    }
+
+    function stopPolling() {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        stopPolling()
+      } else {
+        fetch()
+        startPolling()
+      }
+    }
+
     fetch()
-    const id = setInterval(fetch, 10_000)
-    return () => clearInterval(id)
+    startPolling()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      stopPolling()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [fetch, enabled])
 
   const removeSong = useCallback(async (id: string) => {
