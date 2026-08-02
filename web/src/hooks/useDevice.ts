@@ -5,8 +5,8 @@ import { api } from '../lib/api'
 export function useDevice() {
   const [device, setDeviceState] = useState(getDevice)
 
-  const register = useCallback(async (name: string) => {
-    const result = await api.devices.register(name)
+  const register = useCallback(async (name: string, ticket: string) => {
+    const result = await api.devices.register(name, ticket)
     storeDevice(result.id, result.name)
     setDeviceState({ id: result.id, name: result.name })
     return result

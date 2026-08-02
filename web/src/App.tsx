@@ -22,6 +22,7 @@ type AuthState = 'checking' | 'needs_code' | 'needs_name' | 'ready'
 export default function App() {
   const { isRegistered } = useDevice()
   const [authState, setAuthState] = useState<AuthState>(isRegistered ? 'ready' : 'needs_code')
+  const [registrationTicket, setRegistrationTicket] = useState('')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [activePlaylist, setActivePlaylist] = useState('All')
   const [search, setSearch] = useState('')
@@ -95,11 +96,14 @@ export default function App() {
     toast.success('Song added to library')
   }, [addSong, toast])
 
-  const handleVerified = useCallback(() => setAuthState('needs_name'), [])
+  const handleVerified = useCallback((ticket: string) => {
+    setRegistrationTicket(ticket)
+    setAuthState('needs_name')
+  }, [])
   const handleRegistered = useCallback(() => setAuthState('ready'), [])
 
   if (authState === 'needs_code') return <AuthScreen onVerified={handleVerified} />
-  if (authState === 'needs_name') return <DeviceNameScreen onRegistered={handleRegistered} />
+  if (authState === 'needs_name') return <DeviceNameScreen ticket={registrationTicket} onRegistered={handleRegistered} />
 
   return (
     <div className="min-h-[100dvh] flex flex-col max-w-2xl mx-auto">

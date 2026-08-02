@@ -51,10 +51,10 @@ export interface ProvidersStatusResponse {
 
 export const api = {
   auth: {
-    verify: (code: string) => req<{ ok: boolean }>('POST', '/api/auth/verify', { code }),
+    verify: (code: string) => req<{ ok: boolean; ticket: string }>('POST', '/api/auth/verify', { code }),
   },
   devices: {
-    register: (name: string) => req<{ id: string; name: string }>('POST', '/api/devices/register', { name }),
+    register: (name: string, ticket: string) => req<{ id: string; name: string }>('POST', '/api/devices/register', { name, ticket }),
     rename: (deviceId: string, name: string) => req<{ id: string; name: string }>('PATCH', `/api/devices/${deviceId}`, { name }),
     clearHistory: (deviceId: string) => req<{ ok: boolean }>('DELETE', `/api/devices/${deviceId}/history`),
     unregister: (deviceId: string) => req<{ ok: boolean }>('DELETE', `/api/devices/${deviceId}`),

@@ -3,10 +3,11 @@ import { MusicNote } from '@phosphor-icons/react'
 import { useDevice } from '../hooks/useDevice'
 
 interface Props {
+  ticket: string
   onRegistered: () => void
 }
 
-export function DeviceNameScreen({ onRegistered }: Props) {
+export function DeviceNameScreen({ ticket, onRegistered }: Props) {
   const { register } = useDevice()
   const [name, setName] = useState('')
   const [error, setError] = useState('')
@@ -17,7 +18,7 @@ export function DeviceNameScreen({ onRegistered }: Props) {
     setError('')
     setLoading(true)
     try {
-      await register(name.trim())
+      await register(name.trim(), ticket)
       onRegistered()
     } catch {
       setError('Failed to register device. Check your connection.')

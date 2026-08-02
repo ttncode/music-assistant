@@ -3,7 +3,7 @@ import { MusicNote } from '@phosphor-icons/react'
 import { api } from '../lib/api'
 
 interface Props {
-  onVerified: () => void
+  onVerified: (ticket: string) => void
 }
 
 export function AuthScreen({ onVerified }: Props) {
@@ -16,8 +16,8 @@ export function AuthScreen({ onVerified }: Props) {
     setError('')
     setLoading(true)
     try {
-      await api.auth.verify(code)
-      onVerified()
+      const result = await api.auth.verify(code)
+      onVerified(result.ticket)
     } catch {
       setError('Wrong code. Try again.')
     } finally {
