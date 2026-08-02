@@ -182,6 +182,28 @@ def test_download_song_calls_yt_dlp(tmp_path):
     assert "Test Song.mp3" in result
 
 
+def test_download_song_strips_special_characters_from_filename(tmp_path):
+    """# and friends break naive file-URL parsing on some playback apps (e.g. iOS Bass Booster)."""
+    from services.downloader import download_song, _url_hash
+    mock_info = {"title": "Song #1 Live at #RiverFlowsInYouShow"}
+    with patch("yt_dlp.YoutubeDL") as MockYDL:
+        instance = MockYDL.return_value.__enter__.return_value
+        instance.extract_info.return_value = mock_info
+        folder = tmp_path / "Chill"
+        folder.mkdir()
+        # yt-dlp writes the file under the raw (unstripped) title first
+        raw_mp3 = folder / "Song #1 Live at #RiverFlowsInYouShow.mp3"
+        raw_mp3.write_text("fake")
+        result = download_song("https://youtube.com/watch?v=hashtag", "Chill", str(tmp_path))
+
+    assert "#" not in result
+    assert Path(result).exists()
+    assert not raw_mp3.exists()
+
+    sidecar = folder / f".{_url_hash('https://youtube.com/watch?v=hashtag')}.done"
+    assert sidecar.read_text().strip() == result
+
+
 # --- Route tests ---
 
 DEV = "device-test"

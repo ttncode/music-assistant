@@ -19,6 +19,17 @@ def _sanitize(name: str) -> str:
     return cleaned
 
 
+def _strip_special_chars(name: str) -> str:
+    """Strip URL-special/punctuation characters (#, ?, %, &, ...) from a downloaded
+    filename. Some playback apps build file URLs without percent-encoding, so a
+    literal '#' in the filename truncates the path and the track silently fails
+    to load. Letters (any script), digits, spaces, and -_().,' are kept.
+    """
+    cleaned = re.sub(r"[^\w\s\-().,']", "", name, flags=re.UNICODE)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned or name
+
+
 def _url_hash(url: str) -> str:
     import hashlib
     return hashlib.md5(url.encode()).hexdigest()[:12]
@@ -131,7 +142,12 @@ def download_song(url: str, playlist: str, music_dir: str) -> str:
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         title = info.get("title", "unknown")
-        mp3_path = str(folder / f"{yt_dlp.utils.sanitize_filename(title)}.mp3")
+        downloaded_path = folder / f"{yt_dlp.utils.sanitize_filename(title)}.mp3"
+
+    final_path = folder / f"{_strip_special_chars(downloaded_path.stem)}.mp3"
+    if final_path != downloaded_path:
+        downloaded_path.rename(final_path)
+    mp3_path = str(final_path)
 
     # Write sidecar so get_file_path can find this file later
     sidecar = folder / f".{_url_hash(url)}.done"
