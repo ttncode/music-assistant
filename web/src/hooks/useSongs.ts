@@ -48,8 +48,10 @@ export function useSongs(enabled = true) {
       }
     }
 
-    fetch()
-    startPolling()
+    if (!document.hidden) {
+      fetch()
+      startPolling()
+    }
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
