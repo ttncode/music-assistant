@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, Trash, SignOut, UserSwitch, CircleNotch, PencilSimple } from '@phosphor-icons/react'
 import { useDevice } from '../hooks/useDevice'
 import { api } from '../lib/api'
@@ -23,6 +23,15 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState('')
   const [renaming, setRenaming] = useState(false)
+
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    if (open && !dialog.open) dialog.showModal()
+    if (!open && dialog.open) dialog.close()
+  }, [open])
 
   useEffect(() => {
     if (!open) {
@@ -78,11 +87,13 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
     onUnregistered()
   }
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+    <dialog
+      ref={dialogRef}
+      onClose={onClose}
+      onClick={e => { if (e.target === dialogRef.current) onClose() }}
+      className="settings-dialog fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none justify-end border-0 bg-transparent p-0"
+    >
       <div className="relative w-full max-w-sm bg-[var(--color-surface)] h-full overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
           <h2 className="font-semibold text-sm">Settings</h2>
@@ -195,6 +206,6 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
           </section>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }

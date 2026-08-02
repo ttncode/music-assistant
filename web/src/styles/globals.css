@@ -39,3 +39,7 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
 }
+
+dialog.settings-dialog::backdrop {
+  background-color: rgb(0 0 0 / 0.6);
+}
