@@ -91,13 +91,13 @@ export function SettingsSheet({ open, onClose, onHistoryCleared, onUnregistered 
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      onClick={e => { if (e.target === dialogRef.current) onClose() }}
+      onClick={e => { if (e.target === dialogRef.current) dialogRef.current?.close() }}
       className="settings-dialog fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none justify-end border-0 bg-transparent p-0"
     >
       <div className="relative w-full max-w-sm bg-[var(--color-surface)] h-full overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
           <h2 className="font-semibold text-sm">Settings</h2>
-          <button onClick={onClose} className="cursor-pointer p-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
+          <button onClick={() => dialogRef.current?.close()} className="cursor-pointer p-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]">
             <X size={18} />
           </button>
         </div>
