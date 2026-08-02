@@ -60,7 +60,16 @@ export function FilterBar({
   onPlatformChange,
   onEnterSelectMode,
 }: Props) {
-  const [tooltipInfo, setTooltipInfo] = useState<{ label: string; x: number; y: number } | null>(null)
+  const [tooltipInfo, setTooltipInfo] = useState<{ label: string; x: number; y: number; forPlaylist: string } | null>(null)
+
+  function showTooltip(pl: string, label: string, target: HTMLElement) {
+    const rect = target.getBoundingClientRect()
+    setTooltipInfo({ label, x: rect.left + rect.width / 2, y: rect.top, forPlaylist: pl })
+  }
+
+  function hideTooltip() {
+    setTooltipInfo(null)
+  }
 
   return (
     <>
@@ -93,11 +102,11 @@ export function FilterBar({
               <button
                 key={pl}
                 onClick={() => onPlaylistChange(pl)}
-                onMouseEnter={platformLabel ? (e) => {
-                  const rect = e.currentTarget.getBoundingClientRect()
-                  setTooltipInfo({ label: platformLabel, x: rect.left + rect.width / 2, y: rect.top })
-                } : undefined}
-                onMouseLeave={platformLabel ? () => setTooltipInfo(null) : undefined}
+                onMouseEnter={platformLabel ? (e) => showTooltip(pl, platformLabel, e.currentTarget) : undefined}
+                onMouseLeave={platformLabel ? hideTooltip : undefined}
+                onFocus={platformLabel ? (e) => showTooltip(pl, platformLabel, e.currentTarget) : undefined}
+                onBlur={platformLabel ? hideTooltip : undefined}
+                aria-describedby={tooltipInfo?.forPlaylist === pl ? 'playlist-source-tooltip' : undefined}
                 className={clsx(
                   'shrink-0 cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors',
                   activePlaylist === pl
@@ -135,6 +144,8 @@ export function FilterBar({
 
       {tooltipInfo && (
         <div
+          id="playlist-source-tooltip"
+          role="tooltip"
           className="fixed z-50 pointer-events-none -translate-x-1/2 -translate-y-full px-2 py-1 rounded text-[10px] bg-[var(--color-surface-elevated)] text-[var(--color-text-secondary)] whitespace-nowrap"
           style={{ left: tooltipInfo.x, top: tooltipInfo.y - 6 }}
         >
