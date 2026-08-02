@@ -5,13 +5,14 @@ from pydantic import BaseModel
 from config import Settings, get_settings
 from models import Device, SongsFile
 from store import read_songs, write_songs
-from routers.auth import get_device_id
+from routers.auth import get_device_id, consume_ticket
 
 router = APIRouter(prefix="/api/devices", tags=["devices"])
 
 
 class RegisterBody(BaseModel):
     name: str
+    ticket: str
 
 
 class RenameBody(BaseModel):
@@ -31,6 +32,8 @@ def dedup_devices(data: SongsFile) -> None:
 
 @router.post("/register", status_code=201)
 async def register_device(body: RegisterBody, settings: Settings = Depends(get_settings)):
+    if not consume_ticket(body.ticket):
+        raise HTTPException(status_code=401, detail="Invalid or expired ticket")
     data = read_songs(settings.data_dir)
     dedup_devices(data)
     normalized = body.name.strip().lower()

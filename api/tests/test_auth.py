@@ -16,7 +16,10 @@ def client(monkeypatch):
 def test_verify_correct_code(client):
     res = client.post("/api/auth/verify", json={"code": "secret123"})
     assert res.status_code == 200
-    assert res.json() == {"ok": True}
+    body = res.json()
+    assert body["ok"] is True
+    assert isinstance(body["ticket"], str)
+    assert len(body["ticket"]) > 20
 
 
 def test_verify_wrong_code(client):
@@ -35,3 +38,15 @@ def test_protected_route_requires_device_id(client):
 
     res = client.get("/api/test-device-gate")
     assert res.status_code == 422
+
+
+def test_ticket_is_single_use():
+    from routers.auth import consume_ticket, issue_ticket
+    ticket = issue_ticket()
+    assert consume_ticket(ticket) is True
+    assert consume_ticket(ticket) is False
+
+
+def test_consume_unknown_ticket_returns_false():
+    from routers.auth import consume_ticket
+    assert consume_ticket("not-a-real-ticket") is False
