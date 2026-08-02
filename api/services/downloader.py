@@ -13,7 +13,10 @@ def _get_lock(song_id: str) -> asyncio.Lock:
 
 
 def _sanitize(name: str) -> str:
-    return re.sub(r'[\\/:*?"<>|]', "_", name).strip()
+    cleaned = re.sub(r'[\\/:*?"<>|]', "_", name).strip()
+    if cleaned in ("", ".", ".."):
+        return "_"
+    return cleaned
 
 
 def _url_hash(url: str) -> str:

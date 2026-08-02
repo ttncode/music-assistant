@@ -85,6 +85,37 @@ def test_build_sidecar_index_empty_when_music_dir_missing(tmp_path):
     assert build_sidecar_index(str(missing)) == {}
 
 
+def test_sanitize_rejects_dot_dot():
+    from services.downloader import _sanitize
+    assert _sanitize("..") == "_"
+
+
+def test_sanitize_rejects_single_dot():
+    from services.downloader import _sanitize
+    assert _sanitize(".") == "_"
+
+
+def test_sanitize_rejects_empty_string():
+    from services.downloader import _sanitize
+    assert _sanitize("") == "_"
+
+
+def test_get_file_path_does_not_escape_music_dir_with_dot_dot_playlist(tmp_path):
+    from services.downloader import get_file_path, download_song
+    from unittest.mock import patch
+    music_dir = tmp_path / "music"
+    music_dir.mkdir()
+    with patch("yt_dlp.YoutubeDL") as MockYDL:
+        instance = MockYDL.return_value.__enter__.return_value
+        instance.extract_info.return_value = {"title": "Escape Attempt"}
+        (music_dir / "_").mkdir(parents=True, exist_ok=True)
+        (music_dir / "_" / "Escape Attempt.mp3").write_text("fake")
+        result = download_song("https://youtube.com/watch?v=escape", "..", str(music_dir))
+    # must land inside music_dir/_, never in music_dir's parent
+    assert str(music_dir / "_") in result
+    assert ".." not in Path(result).parts
+
+
 @pytest.mark.parametrize("use_index", [False, True])
 def test_get_file_path_relocates_file_from_different_playlist_folder_with_and_without_index(tmp_path, use_index):
     from services.downloader import get_file_path, build_sidecar_index, _url_hash, _sanitize
