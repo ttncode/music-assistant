@@ -1,3 +1,4 @@
+import hmac
 from fastapi import APIRouter, Depends, HTTPException, Header
 from config import Settings, get_settings
 
@@ -10,7 +11,7 @@ async def verify(
     settings: Settings = Depends(get_settings),
 ):
     code = body.get("code", "")
-    if code != settings.access_code:
+    if not hmac.compare_digest(code, settings.access_code):
         raise HTTPException(status_code=401, detail="Invalid access code")
     return {"ok": True}
 
