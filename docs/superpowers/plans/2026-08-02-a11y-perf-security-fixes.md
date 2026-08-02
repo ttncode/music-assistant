@@ -1078,7 +1078,7 @@ to:
 - [ ] **Step 6: Type-check and manual verification**
 
 ```bash
-cd web && npx tsc -b --noEmit
+cd web && ./node_modules/.bin/tsc -b --noEmit
 ```
 
 Expected: no type errors.
