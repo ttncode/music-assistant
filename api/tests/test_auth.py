@@ -50,3 +50,22 @@ def test_ticket_is_single_use():
 def test_consume_unknown_ticket_returns_false():
     from routers.auth import consume_ticket
     assert consume_ticket("not-a-real-ticket") is False
+
+
+def test_verify_rate_limited_after_too_many_attempts(client):
+    for _ in range(10):
+        client.post("/api/auth/verify", json={"code": "wrong"})
+    res = client.post("/api/auth/verify", json={"code": "wrong"})
+    assert res.status_code == 429
+    assert "Retry-After" in res.headers
+
+
+def test_verify_rate_limit_resets_after_success(client):
+    for _ in range(5):
+        client.post("/api/auth/verify", json={"code": "wrong"})
+    res = client.post("/api/auth/verify", json={"code": "secret123"})
+    assert res.status_code == 200
+    # counter was reset by the success above, so a fresh run of attempts starts from zero
+    for _ in range(9):
+        res = client.post("/api/auth/verify", json={"code": "wrong"})
+        assert res.status_code == 401
