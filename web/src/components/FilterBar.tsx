@@ -103,7 +103,7 @@ export function FilterBar({
                 key={pl}
                 onClick={() => onPlaylistChange(pl)}
                 onMouseEnter={platformLabel ? (e) => showTooltip(pl, platformLabel, e.currentTarget) : undefined}
-                onMouseLeave={platformLabel ? hideTooltip : undefined}
+                onMouseLeave={platformLabel ? (e) => { if (document.activeElement !== e.currentTarget) hideTooltip() } : undefined}
                 onFocus={platformLabel ? (e) => showTooltip(pl, platformLabel, e.currentTarget) : undefined}
                 onBlur={platformLabel ? hideTooltip : undefined}
                 aria-describedby={tooltipInfo?.forPlaylist === pl ? 'playlist-source-tooltip' : undefined}
