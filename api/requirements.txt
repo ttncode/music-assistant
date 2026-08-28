@@ -3,6 +3,7 @@ uvicorn[standard]==0.32.1
 pydantic-settings==2.6.1
 filelock==3.16.1
 httpx==0.28.1
-yt-dlp==2026.7.4
+yt-dlp==2026.8.19
+curl_cffi==0.15.0
 pytest==8.3.4
 pytest-asyncio==0.24.0

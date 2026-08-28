@@ -23,3 +23,6 @@ data/
 # Superpowers internal tooling
 .superpowers/
 .worktrees/
+
+# App
+.env
