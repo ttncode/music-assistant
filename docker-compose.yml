@@ -8,4 +8,4 @@ services:
       - ./data:/data
       - ${HOME}/music/music-assistant:/music
     env_file: .env
-    restart: unless-stopped
+    restart: "no"
